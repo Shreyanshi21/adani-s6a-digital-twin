@@ -1,0 +1,45 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Pipeline: build everything",
+      "type": "shell",
+      "command": "python pipeline/run_pipeline.py",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Pipeline: re-link newest schedule (XER)",
+      "detail": "Use after dropping a new .xer into data/schedule",
+      "type": "shell",
+      "command": "python pipeline/run_pipeline.py --from link",
+      "problemMatcher": []
+    },
+    {
+      "label": "Pipeline: rebuild IFC model (from features)",
+      "type": "shell",
+      "command": "python pipeline/run_pipeline.py --from ifc",
+      "problemMatcher": []
+    },
+    {
+      "label": "Pipeline: rebuild viewer outputs only",
+      "detail": "After editing viewer/index.html",
+      "type": "shell",
+      "command": "python pipeline/run_pipeline.py --from dist",
+      "problemMatcher": []
+    },
+    {
+      "label": "Serve viewer (http://localhost:8765)",
+      "type": "shell",
+      "command": "python -m http.server 8765 --bind 127.0.0.1 --directory dist",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Render preview PNGs of the IFC",
+      "type": "shell",
+      "command": "python pipeline/render_ifc.py build/Khavda_Hybrid_Park_S6a-234MW.ifc build/preview park,s6a,close,pss",
+      "problemMatcher": []
+    }
+  ]
+}

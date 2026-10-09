@@ -1,0 +1,29 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug: full pipeline",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/pipeline/run_pipeline.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Debug: pipeline from 'link' step",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/pipeline/run_pipeline.py",
+      "args": ["--from", "link"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Open viewer in Chrome (start 'Serve viewer' task first)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8765/",
+      "webRoot": "${workspaceFolder}/dist"
+    }
+  ]
+}

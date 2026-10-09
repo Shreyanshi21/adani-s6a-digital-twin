@@ -1,0 +1,6 @@
+{
+  "files.exclude": { "**/__pycache__": true },
+  "search.exclude": { "build/**": true, "dist/**": true, "viewer/web-ifc.wasm": true },
+  "files.associations": { "*.xer": "plaintext" },
+  "python.analysis.extraPaths": ["./pipeline"]
+}

@@ -1,0 +1,110 @@
+# Khavda Hybrid Park – S6a-234MW IFC model
+
+**Files:** `C:\Users\shreyanshi.jaiswal\Downloads\Adani S6a IFC\`
+- `Khavda_Hybrid_Park_S6a-234MW.ifc` (IFC4, 24.8 MB, 0 schema errors)
+- `Khavda_Hybrid_Park_S6a-234MW.ifczip` (same model, 4.9 MB)
+- `index.html` and `Open IFC Viewer.bat` (the realistic viewer)
+
+The files are in Downloads because Windows Controlled Folder Access stops scripts from writing into Documents.
+
+**Source:** 51YY-KPIG-ARY-BES-DE-L-0001 R2 (18.03.2026). Sheet 1 gives the whole Khavda park. Sheet 3 is the detailed S6a array, which has the same frame as sheet 2. Geometry was read from the PDF vector layers, not traced by eye.
+
+## Schedule link and VisiLean status (4D)
+- **Source:** `S6 sheet\FY26-P18 S6a 01.10.2026.xer` (data date 26 Sep 2026), 2,300 activities.
+- **Stored in the IFC:**
+  - One `IfcWorkSchedule`.
+  - One `IfcTask` per activity: Identification is the Activity ID (the VisiLean External Id), Status is the VisiLean status, and an `IfcTaskTime` holds planned, early, late and actual dates plus % complete. A `VL_Activity` pset is attached to each.
+  - One `IfcTask` per WBS node, nested with `IfcRelNests`. This is the VisiLean location tree: Phase → Block → DC side / AC side / pre-commissioning / commissioning / HOTO.
+  - `IfcRelAssignsToProcess` links each activity to its model elements.
+- **Linked:** 1,390 activities, i.e. all 1,387 block construction, commissioning and HOTO activities, plus boundary fencing, air strip and external roads.
+- **Mapping within each block:**
+  - Piling-MMS, pile capping, array earthing → piles
+  - MMS erection, MMS RFI, robotic structure / robots → MMS
+  - Module installation, module RFI, DC cable, MC4, VOC → modules
+  - Piling-inverters → inverter structures
+  - Inverter installation and terminations → inverters
+  - IDT foundations, HT/LT station slab, NIFPS/BOT foundations → IDT plinth
+  - IDT erection, filtration, testing, HT terminations → IDT
+  - Station shed, sheeting, staircase, HT panel → HT panel
+  - LT panel, ACDB, SCADA → LT panel
+  - Aux transformer → aux transformer
+  - IDT fencing, gate, gravel → IDT fence
+  - Cabling, pre-commissioning, commissioning, HOTO → block array zone
+- **How VisiLean status is derived from P6:** Complete = P6 complete. Started = P6 in progress. A not-started activity is Not Committed when all its logic predecessors are satisfied, otherwise Not Ready. Delayed = past its planned start or finish at the data date.
+- **Status at data date:** 533 Complete, 102 Started, 87 Not Committed, 1,578 Not Ready; 45 delayed.
+- **Colours (sampled from VisiLean screens):** Not Ready `#d47d70`, Not Committed `#ddd75d`, Started `#3c007b`, Complete `#72a64c`. Ready, Forced Ready and Committed only appear when a VisiLean export is loaded; their colours are placeholders to confirm.
+- **Using live VisiLean statuses:** in the viewer, open the Schedule tab and click **Load VisiLean export (CSV)**. It matches on the `External Id` and `Status` columns and skips WBS (Parent) rows.
+- **Script:** `link_schedule.py model.ifc schedule.xer out.ifc report.json` re-links a newer XER.
+
+## IFC viewer
+The viewer is in `Downloads\Adani S6a IFC\`: `index.html` plus `Open IFC Viewer.bat`. Its source is also in `ifc-viewer\index.html` in this folder.
+- To start it, double-click **Open IFC Viewer.bat**. It runs a local Python web server on port 8765 and opens your browser. Leave the black window open while you use the viewer.
+- The viewer needs an internet connection the first time, because it loads three.js, web-ifc and fflate from the jsDelivr CDN.
+- **Realistic mode** (toggle **Realistic** or press `R`):
+  - Sky with clouds and haze
+  - Sun shadows (toggle **Shadows** or press `S`)
+  - PV glass texture with 6×22 half-cut cells and silver frames, on every one of the 509,208 modules
+  - Sand and asphalt textures
+  - Turbine rotors that spin (toggle **Turbines**)
+  - **▶ Tour**: a guided fly-through of the park, S6a, Block-07 rows, ICR-07, PSS-10, BESS and a WTG
+- **Labels** (toggle **Labels** or press `L`): they appear by zoom level and are clickable to select.
+  - Far: park, plots and PSS
+  - Mid: ICR blocks/stations, WTGs, towers and BESS yards
+  - Close: inverters, ICR equipment and BESS containers
+  - Very close: every table tag, e.g. `B07-T0100`
+- **Performance:** tables are drawn as shared, tiled instances. Beyond about 750 m each table is shown as one textured slab, and piles and structures are hidden. From high above, the indicative plots show as solid blue array areas.
+- **Other features:**
+  - Model tree with visibility toggles
+  - Class filter
+  - Search by name or tag
+  - Properties panel showing all property sets, type properties and UTM E/N coordinates
+  - Colour modes: IFC materials, by ICR block / container, by IFC class
+  - Isolate, hide and show all
+  - Zoom-to menu for each ICR block and for PSS-10
+  - Measure tool
+  - Open… or drag-and-drop for any other `.ifc` / `.ifczip` file
+
+## Georeferencing
+- CRS: WGS 84 / UTM 42N (EPSG:32642), set with IfcMapConversion. Model origin is E 545000, N 2662000.
+- Sheet 3 is fitted to the 19 ICR coordinate labels (E/N). The maximum residual is 0.02 m.
+- Sheet 1 is fitted to 11 boundary coordinate points. The maximum residual is 0.15 m.
+- Cross-check: WTG hubs on sheet 1 sat about 14 m from the same WTGs on sheet 3. The offset was systematic and has been corrected.
+
+## Spatial tree
+```
+Project
+└─ Site: Khavda Hybrid Renewable Energy Park
+   ├─ Site: Plot S6a – 234 MW AC / 318.26 MWp
+   │  ├─ Block-01 (ICR-01) … Block-19 (ICR-19)   ← tables, inverters, ICR station, coloured zone
+   │  ├─ S6a Common Infrastructure               ← internal / peripheral roads, fence, WTG roads, crane pads
+   │  ├─ PSS-10 / KPS-3 33/400 kV GIS             ← 4 power transformers, GIS hall, control bldg, SVG/HF bays
+   │  └─ BESS – PSS-10                            ← battery containers and PCS skids (Ph-1 yards + 39 acre area)
+   ├─ Wind Farm – 393 × 5.2 MW WTG (W2E, HH 120 m, RD 160 m)
+   ├─ 400 kV Transmission Lines (276 lattice towers + conductors)
+   ├─ Pooling Substations (PSS-01 … PSS-13) & 765/400 kV KPS switchyards
+   ├─ Park Infrastructure (plant roads, TL corridors + main roads, air-strip road, no-go areas, compounds, boundary)
+   ├─ Other Solar Plots – indicative PV arrays (HSAT rows, 5.5 m pitch)
+   └─ Terrain
+```
+
+## S6a contents (as on the drawing)
+| Item | Qty in model | BOQ on drawing |
+|---|---|---|
+| FT tables 2Px28 (32.292 × 4.788 m, 17° tilt, 7.5 m pitch) | 9,093 | 9,093 |
+| Each table is split into Piles (12), MMS structure and PV modules (56 × 625 Wp) | 3 × 9,093 elements | – |
+| Individual PV modules (2,384 × 1,134 × 35 mm, 20 mm gaps, 17° tilt, 2 rows of 28) | 509,208 module solids | 509,208 |
+| WTG rotors as separate elements (aggregated to their WTG) | 393 | – |
+| String inverters 275 kW (with canopy structure) | 883 | 883 |
+| ICR / IDT stations (13.75 MVA IDT, HT panel, LT panel, aux trafo, fence) | 19 | 19 |
+| WTGs inside the S6a area | 19 | – |
+
+Tags follow the P6 schedule (FY26-P18 S6a XER): `S6a-B07-T0123`, `S6a-B07-INV05`, `S6a-ICR-07`.
+Every S6a element carries the `VL_Location` pset: Project, Plot, Phase (PHASE-1…5 as in the XER), Block, ICR, and block totals.
+Phase mapping: Blocks 1–4 = Phase-1, 5–8 = Phase-2, 9–12 = Phase-3, 13–16 = Phase-4, 17–19 = Phase-5.
+
+## Assumptions and limitations
+- **Block assignment:** tables were assigned to blocks from the drawing's "ICR BLOCKING" layer. That layer has no polygon for Block 8, so tables there were assigned to the nearest ICR. Most blocks hold 486 tables; blocks 5, 8, 9, 10, 13 and 14 vary between 358 and 533.
+- **Typical dimensions:** these items are modelled from typical sizes, not drawn details: table clearance (0.8 m lower edge), pile and rafter sections, inverter canopy, IDT and panel sizes, power transformers, GIS hall, BESS container layout, tower shape and WTG shape.
+- **Other plots:** only plot boundaries exist on sheet 1, so all plots other than S6a are shown as indicative HSAT rows.
+- **Other PSS:** PSS-01 to PSS-13 (except PSS-10) use a generic substation layout placed at their GIS symbol on sheet 1. PSS-02 and PSS-05 had no GIS symbol, so they are placed at their labels.
+- **Not modelled:** the cable trench sections (sheet 9) and the DC/AC cable routes.
