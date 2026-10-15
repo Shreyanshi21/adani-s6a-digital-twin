@@ -229,7 +229,7 @@ for t in f.by_type('IfcTask'):
                   'ps': tt.ScheduleStart if tt else None, 'pf': tt.ScheduleFinish if tt else None,
                   'as': tt.ActualStart if tt else None, 'af': tt.ActualFinish if tt else None,
                   'es': tt.EarlyStart if tt else None, 'ef': tt.EarlyFinish if tt else None,
-                  'bs': vp.get('BaselineStart'), 'bf': vp.get('BaselineFinish'),
+                  'bs': vp.get('BaselineStart'), 'bf': vp.get('BaselineFinish'), 'src': vp.get('DatesSource') or 'P6 XER',
                   'pct': round((tt.Completion or 0) * 100) if tt else 0, 'dd': tt.StatusTime if tt else None,
                   'mile': bool(t.IsMilestone), 'elems': []})
 for r in f.by_type('IfcRelAssignsToProcess'):

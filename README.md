@@ -25,6 +25,7 @@ You need Python 3.11 or newer. The viewer needs a recent Chrome or Edge, and int
 | Build everything (reuses finished steps) | `python pipeline/run_pipeline.py` |
 | New schedule: drop the `.xer` into `data/schedule/`, then | `python pipeline/run_pipeline.py --from link` |
 | Choose the baseline for Planned vs Actual | `--baseline <file>` (default: the oldest other `.xer` in `data/schedule/`) |
+| Live VisiLean status, % complete and baseline / planned / actual dates | put the S6a VisiLean API token in `data/visilean/token.txt` (git-ignored) or `VL_TOKEN_ADANI`, then `python pipeline/run_pipeline.py --from link`. Without a token the XER is used. |
 | Rebuild the IFC after editing `build_ifc.py` | `python pipeline/run_pipeline.py --from ifc` |
 | Rebuild viewer outputs after editing `viewer/index.html` | `python pipeline/run_pipeline.py --from dist` |
 | Open the viewer | `python -m http.server 8765 --directory dist`, then go to <http://localhost:8765> |

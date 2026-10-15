@@ -248,7 +248,7 @@
     <div id="taskDlg" class="dlg" hidden><div class="dlg-card">
       <div class="dlg-head"><div class="ttl"><div class="eyebrow">VisiLean activities</div><div id="dlgTitle" class="sch-title"></div></div>
         <input id="dlgQ" class="sch-in" placeholder="Search activity ID, name or location"><button id="dlgClose" class="fclr" title="Close (Esc)">✕</button></div>
-      <div class="dlg-body"><table class="dlg-t"><thead><tr><th>Status</th><th>Activity ID</th><th>Activity</th><th>Location</th><th>Baseline start → finish</th><th>Actual / forecast start → finish</th><th>%</th><th>Elements</th></tr></thead><tbody id="dlgRows"></tbody></table></div>
+      <div class="dlg-body"><table class="dlg-t"><thead><tr><th>Status</th><th>Activity ID</th><th>Activity</th><th>Location</th><th>Baseline start → finish</th><th>Planned start → finish</th><th>Actual start → finish</th><th>%</th><th>Elements</th></tr></thead><tbody id="dlgRows"></tbody></table></div>
       <div class="dlg-foot" id="dlgFoot"></div>
     </div></div>
     <div id="timeline" hidden>
@@ -1427,7 +1427,7 @@ const fmtD = (iso) => { if (!iso) return '—'; const d = new Date(iso); return 
 function normStatus(s) {
   const t = String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
   const map = { 'not ready': 'Not Ready', 'not committed': 'Not Committed', 'ready': 'Ready', 'forced ready': 'Forced Ready', 'committed': 'Committed',
-    'started': 'Started', 'in progress': 'Started', 'complete': 'Complete', 'completed': 'Complete' };
+    'started': 'Started', 'in progress': 'Started', 'rejected at qc': 'Started', 'complete': 'Complete', 'completed': 'Complete', 'quality checked': 'Complete' };
   return map[t] || null;
 }
 function workType(name) { return String(name || '').replace(/^Block-\d+\s*-\s*/i, '').replace(/\s+/g, ' ').replace(/ to /gi, ' To ').trim(); }
@@ -1443,6 +1443,10 @@ function readSchedule() {
       sched.tasks.push(t); sched.byId.set(t.id, t);
       for (const e of t.elems) { if (!sched.elemTasks.has(e)) sched.elemTasks.set(e, []); sched.elemTasks.get(e).push(t); }
     }
+    // activities matched in the VisiLean API snapshot carry its status, % complete and baseline / planned / actual dates
+    const live = sched.tasks.filter(t => /^VisiLean API/.test(t.src || ''));
+    if (live.length) { sched.source = `Live from the VisiLean API · ${live.length.toLocaleString('en-IN')} of ${sched.tasks.length.toLocaleString('en-IN')} activities · fetched ${fmtD(live[0].src.replace('VisiLean API ', ''))}`; sched.live = true; }
+    else sched.live = false;
     updateDelayed();
     return true;
   }
@@ -1531,7 +1535,7 @@ function refreshScheduleUI() {
     openTaskDialog(s === '__late' ? 'Delayed activities' : `${s} activities`, sched.tasks.filter(t => s === '__late' ? t.delayed : t.status === s));
   });
   $('schSource').innerHTML = sched.source === 'P6'
-    ? '<span class="muted">Status derived from P6 progress &amp; logic. Load a VisiLean export to use live VisiLean statuses.</span>'
+    ? '<span class="muted">Status and dates from the P6 XER (no VisiLean API token was available when the model was built). Load a VisiLean export to use live statuses.</span>'
     : `<span style="color:var(--vl-cp);font-weight:600">✓ ${escapeHtml(sched.source)}</span>`;
   if ($('schStat').value || $('schLoc').value || $('schKind').value) applySchedFilter();
 }
@@ -1586,9 +1590,10 @@ function renderTaskDialog() {
     return `<tr data-t="${t.id}"><td>${chip(t.status)}${t.delayed ? '<div style="margin-top:3px"><span class="vl late">Delayed</span></div>' : ''}</td>
       <td class="n">${escapeHtml(t.code)}</td><td>${escapeHtml(t.name)}</td><td>${escapeHtml(shortLoc(t.loc))}</td>
       <td class="n">${fmtD(t.bs || t.ps)} → ${fmtD(t.bf || t.pf)}</td>
-      <td class="n">${fmtD(T.s ? new Date(T.s).toISOString() : null)} → ${fmtD(T.f ? new Date(T.f).toISOString() : null)}${t.af ? '' : t.as ? ' <span class="muted">(fc)</span>' : ''}</td>
+      <td class="n">${fmtD(t.ps)} → ${fmtD(t.pf)}</td>
+      <td class="n">${t.as ? fmtD(t.as) + ' → ' + (t.af ? fmtD(t.af) : '<span class="muted">ongoing</span>') : '<span class="muted">not started</span>'}</td>
       <td class="n">${t.pct}%</td><td class="n">${t.elems.length ? t.elems.length.toLocaleString('en-IN') : '<span class="muted">not in model</span>'}</td></tr>`;
-  }).join('') || '<tr><td colspan="8" class="muted" style="padding:14px">No activities match.</td></tr>';
+  }).join('') || '<tr><td colspan="9" class="muted" style="padding:14px">No activities match.</td></tr>';
   $('dlgFoot').textContent = `${rows.length.toLocaleString('en-IN')} activit${rows.length === 1 ? 'y' : 'ies'}` + (rows.length > MAX ? ` · showing the first ${MAX} (use search)` : '') +
     ' · click an activity to see its properties and highlight its elements';
   $('dlgRows').querySelectorAll('tr[data-t]').forEach(r => r.onclick = () => {
@@ -1607,12 +1612,11 @@ function showTaskProps(t) {
   $('props').innerHTML = `<div class="eyebrow">VisiLean activity</div><h2>${escapeHtml(t.name)}</h2>
     <div style="margin:6px 0">${chip(t.status)} ${t.delayed ? '<span class="vl late">Delayed</span>' : ''}</div>` +
     table([['Activity ID (External Id)', t.code], ['VisiLean location', t.loc], ['% complete', t.pct + '%'], ['Data date', fmtD(t.dd)],
-      ['Status source', sched.source === 'P6' ? 'Derived from P6' : sched.source]]) +
+      ['Status and dates from', /^VisiLean API/.test(t.src || '') ? 'VisiLean API' : sched.source === 'P6' ? 'P6 XER (status derived from progress and logic)' : sched.source]]) +
     '<h3>Dates</h3>' + table([['Baseline start', fmtD(t.bs || t.ps)], ['Baseline finish', fmtD(t.bf || t.pf)],
-      ['Planned start (current)', fmtD(t.ps)], ['Planned finish (current)', fmtD(t.pf)],
+      ['Planned start', fmtD(t.ps)], ['Planned finish', fmtD(t.pf)],
       ['Actual start', fmtD(t.as)], ['Actual finish', fmtD(t.af)],
-      ...(t.af ? [] : [['Forecast start', fmtD(t.es)], ['Forecast finish', fmtD(t.ef)]]),
-      ['Finish vs baseline', finishVariance(t)]]) +
+      ['Planned finish vs baseline', finishVariance(t)]]) +
     '<h3>Linked model elements</h3>' + (t.elems.length ? table(linkedSummary(t)) +
       `<button class="sch-btn" id="tpZoom">Highlight and zoom to the ${t.elems.length.toLocaleString('en-IN')} element${t.elems.length === 1 ? '' : 's'}</button>`
       : '<p class="muted">Not linked: this activity has no element in the model (procurement, engineering or a milestone).</p>');
@@ -2015,6 +2019,12 @@ function tlRefresh(full = false) {
     (Math.abs(tl.t - tl.dd) < DAY ? ' <span class="muted">· data date</span>' : tl.t > tl.dd ? ' <span class="muted">· forecast</span>' : '');
   tlLegend(); tlDrawChart();
 }
+// average progress over activities: baseline = elapsed share of each baseline window; actual = VisiLean % complete
+function progPlanned(tasks, D) {
+  let s = 0; for (const t of tasks) { const T = taskTimes(t); if (T.bs == null) continue; s += T.bf > T.bs ? Math.min(1, Math.max(0, (D - T.bs) / (T.bf - T.bs))) : (D >= T.bs ? 1 : 0); }
+  return tasks.length ? (100 * s / tasks.length).toFixed(1) : '0';
+}
+function progActual(tasks) { let s = 0; for (const t of tasks) s += t.status === 'Complete' ? 100 : (t.pct || 0); return tasks.length ? (s / tasks.length).toFixed(1) : '0'; }
 function tlLegend() {
   const D = tl.t, tasks = sched.tasks.filter(t => (!sched.wp || t.type === sched.wp) && taskTimes(t).s != null);
   const elCnt = [0, 0, 0, 0]; for (const s of tl.state.values()) if (s >= 0) elCnt[s]++;
@@ -2028,7 +2038,8 @@ function tlLegend() {
     for (const t of tasks) { c[pvaTask(t, D)]++; const T = taskTimes(t); if (T.bf != null && D >= T.bf) pDone++; if (T.f != null && D >= T.f) aDone++; }
     const pct = (n) => tasks.length ? Math.round(100 * n / tasks.length) : 0;
     html = `<div class="hd">Activities vs baseline</div>` + [3, 1, 2, 0].map(i => `<div class="it" data-s="${i}" title="Click to highlight the elements"><span class="sw" style="background:${PVA[i].hex}"></span>${PVA[i].label}<b>${c[i].toLocaleString('en-IN')}</b></div>`).join('') +
-      `<div class="muted" style="margin-top:3px">Finished: planned ${pct(pDone)}% · ${tl.t > tl.dd ? 'forecast' : 'actual'} ${pct(aDone)}% of ${tasks.length.toLocaleString('en-IN')}</div>`;
+      `<div class="muted" style="margin-top:3px">Finished: baseline ${pct(pDone)}% · ${tl.t > tl.dd ? 'planned' : 'actual'} ${pct(aDone)}% of ${tasks.length.toLocaleString('en-IN')}</div>` +
+      `<div class="muted">Progress (avg % complete): baseline ${progPlanned(tasks, D)}% · actual ${progActual(tasks)}% at the data date</div>`;
   }
   $('tlLegend').innerHTML = html;
   $('tlLegend').querySelectorAll('.it[data-s]').forEach(it => it.onclick = () => {

@@ -13,3 +13,6 @@ venv/
 Thumbs.db
 desktop.ini
 ~$*
+
+# VisiLean API token (never commit)
+data/visilean/

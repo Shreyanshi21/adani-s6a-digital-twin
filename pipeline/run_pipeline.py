@@ -63,7 +63,11 @@ def main():
     if need('pdf', out('p3.pkl')): run('cache_pdf.py', a.pdf, BUILD)
     if need('extract', out('features.json')): run('extract.py', BUILD)
     if need('ifc', out(f'{MODEL}_base.ifc')): run('build_ifc.py', out('features.json'), out(f'{MODEL}_base.ifc'))
-    if need('link', out(f'{MODEL}.ifc')): run('link_schedule.py', out(f'{MODEL}_base.ifc'), xer, out(f'{MODEL}.ifc'), out('link_report.json'), *([base] if base else []))
+    if need('link', out(f'{MODEL}.ifc')):
+        # live VisiLean status, % complete and baseline / planned / actual dates (skipped without a token)
+        run('visilean_api.py', out('visilean_tasks.json'))
+        vl = [out('visilean_tasks.json')] if os.path.exists(out('visilean_tasks.json')) else []
+        run('link_schedule.py', out(f'{MODEL}_base.ifc'), xer, out(f'{MODEL}.ifc'), out('link_report.json'), *([base] if base else []), *vl)
     if need('scene', out('scene.bin')): run('export_scene.py', out(f'{MODEL}.ifc'), out('scene.bin'))
 
     if 'dist' in force or not os.path.exists(os.path.join(DIST, 'index.html')) or a.start is None:

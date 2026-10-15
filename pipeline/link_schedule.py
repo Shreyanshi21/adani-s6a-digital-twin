@@ -1,6 +1,8 @@
 """Link P6 (XER) activities to IFC elements, with VisiLean status, location = P6 WBS (VisiLean location breakdown).
 
-usage: link_schedule.py model_in.ifc schedule.xer model_out.ifc link_report.json [baseline.xer]
+usage: link_schedule.py model_in.ifc schedule.xer model_out.ifc link_report.json [baseline.xer] [visilean_tasks.json]
+When the VisiLean API snapshot is given, each activity's status, % complete and baseline / planned / actual dates come
+from VisiLean (matched on External Id = P6 Activity ID); the XER still supplies the WBS (location tree) and the logic.
 Adds: IfcWorkSchedule, IfcTask per WBS node (summary) and per activity, IfcTaskTime, IfcRelNests (location tree),
 IfcRelAssignsToControl (tasks -> schedule), IfcRelAssignsToProcess (activity -> model elements), Pset VL_Activity.
 """
@@ -10,18 +12,38 @@ sys.path.insert(0, __file__.rsplit('\\', 1)[0] if '\\' in __file__ else __file__
 from xer import parse_xer
 
 IFC_IN, XER, IFC_OUT, REPORT = sys.argv[1:5]
-BASE = sys.argv[5] if len(sys.argv) > 5 else None
+BASE = next((a for a in sys.argv[5:] if a.lower().endswith('.xer')), None)
+VLF = next((a for a in sys.argv[5:] if a.lower().endswith('.json')), None)
 f = ifcopenshell.open(IFC_IN)
 x = parse_xer(XER)
 # baseline = planned dates of an earlier XER (P6 resets the planned dates of not-started activities on every update)
 base = {t['task_code']: t for t in parse_xer(BASE)['TASK']} if BASE else {}
 print('baseline', BASE or 'none', len(base), 'activities')
+VLJ = json.load(open(VLF, encoding='utf-8')) if VLF else None
+VL = {}
+for v in (VLJ or {}).get('tasks', []):
+    k = str(v.get('externalId') or '').strip()
+    if k and not v.get('parent') and k not in VL: VL[k] = v
+def vdate(s):
+    s = (s or '').strip()
+    if not s: return None
+    for fmt in ('%d/%m/%Y %H:%M:%S', '%d/%m/%Y %H:%M', '%d/%m/%Y', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%d'):
+        try: return datetime.datetime.strptime(s[:19], fmt)
+        except ValueError: pass
+    return None
+VL_STATUS = {'not ready': 'Not Ready', 'not committed': 'Not Committed', 'ready': 'Ready', 'forced ready': 'Forced Ready',
+             'committed': 'Committed', 'started': 'Started', 'in progress': 'Started', 'rejected at qc': 'Started',
+             'complete': 'Complete', 'completed': 'Complete', 'quality checked': 'Complete'}
+print('VisiLean API', VLF or 'not used', len(VL), 'activities with an External Id')
 G = ifcopenshell.guid.new
 C = f.create_entity
 
 proj = x['PROJECT'][0]
 data_date = (proj.get('next_data_date') or proj.get('last_recalc_date') or '').strip()
 DD = datetime.datetime.strptime(data_date[:16], '%Y-%m-%d %H:%M') if data_date else datetime.datetime.now()
+if VL:
+    DD = datetime.datetime.fromisoformat(VLJ['fetched'])
+    print('data date = VisiLean snapshot', DD)
 print('data date', DD)
 
 W = {w['wbs_id']: w for w in x['PROJWBS']}
@@ -127,6 +149,7 @@ for w in x['PROJWBS']:
     if w['parent_wbs_id'] in wbs_task: nest[w['parent_wbs_id']].append(wbs_task[w['wbs_id']])
 
 act_task = {}
+vl_n = 0
 status_count = collections.Counter(); link_count = collections.Counter(); delayed_n = 0
 assign = []
 report = []
@@ -138,7 +161,6 @@ for t in T:
     as_, af = pdate(t['act_start_date']), pdate(t['act_end_date'])
     pct = float(t['phys_complete_pct'] or 0)
     delayed = (st != 'Complete' and pf is not None and pf < DD) or (st in ('Not Ready', 'Not Committed') and ps is not None and ps < DD)
-    delayed_n += delayed
     loc = location(t['wbs_id'])
     tt = C('IfcTaskTime', None, None, None, 'WORKTIME', None, iso(ps), iso(pf), iso(es), iso(ef), iso(ls_), iso(lf),
            None, None, None, iso(DD), None, iso(as_), iso(af), None, (pct / 100.0) if pct > 0 else None)
@@ -147,15 +169,34 @@ for t in T:
              'CONSTRUCTION' if loc.startswith('CONSTRUCTION') else 'NOTDEFINED')
     act_task[t['task_id']] = task
     nest[t['wbs_id']].append(task)
-    status_count[st] += 1
     tf = t.get('total_float_hr_cnt')
     b = base.get(t['task_code'])
     bs, bf = (pdate(b['target_start_date']), pdate(b['target_end_date'])) if b else (ps, pf)
+    v = VL.get(t['task_code'])
+    if v:   # VisiLean is the source of truth: its status, % complete and baseline / planned / actual dates
+        st = VL_STATUS.get(str(v.get('status') or '').strip().lower(), st)
+        ps, pf = vdate(v.get('plannedStartDate')) or ps, vdate(v.get('plannedEndDate')) or pf
+        es, ef = ps, pf                       # VisiLean planned dates are the forecast
+        as_, af = vdate(v.get('actualStartDate')), vdate(v.get('actualEndDate'))
+        if st == 'Complete' and not af: af = pf
+        if st in ('Started', 'Complete') and not as_: as_ = ps
+        bs, bf = vdate(v.get('baselineStartDate')) or ps, vdate(v.get('baselineEndDate')) or pf
+        pct = float(v.get('percentComplete') or 0)
+        d0 = DD.replace(hour=0, minute=0, second=0)       # late = planned date before the data date (a date, not a time)
+        delayed = (st != 'Complete' and pf is not None and pf < d0) or (st not in ('Started', 'Complete') and ps is not None and ps < d0)
+        tt.ScheduleStart, tt.ScheduleFinish, tt.EarlyStart, tt.EarlyFinish = iso(ps), iso(pf), iso(es), iso(ef)
+        tt.ActualStart, tt.ActualFinish, tt.StatusTime = iso(as_), iso(af), iso(DD)
+        tt.Completion = (pct / 100.0) if pct > 0 else None
+        task.Status = st
+        vl_n += 1
+    status_count[st] += 1
+    delayed_n += delayed
     pset('VL_Activity', {'ActivityID': t['task_code'], 'VisiLeanLocation': loc, 'VisiLeanStatus': st,
                          'P6Status': t['status_code'].replace('TK_', ''), 'PercentComplete': pct, 'Delayed': bool(delayed),
                          'TotalFloat_days': round(float(tf) / 8.0, 1) if tf not in (None, '') else None,
                          'DataDate': DD.strftime('%d %b %Y'), 'BaselineStart': iso(bs), 'BaselineFinish': iso(bf),
-                         'BaselineSource': BASE.replace(chr(92), '/').split('/')[-1] if b else 'current XER (not in baseline)'}, task)
+                         'BaselineSource': ('VisiLean API' if v else BASE.replace(chr(92), '/').split('/')[-1] if b else 'current XER (not in baseline)'),
+                         'DatesSource': 'VisiLean API ' + VLJ['fetched'] if v else 'P6 XER'}, task)
     # ---- element links
     objs = []
     chain = [w['wbs_name'] for w in wbs_chain(t['wbs_id'])]
@@ -184,5 +225,6 @@ f.write(IFC_OUT)
 linked = sum(1 for r in report if r['elements'])
 print('activities', len(T), 'linked to elements', linked, 'status', dict(status_count), 'delayed', delayed_n)
 print('links by role', dict(link_count))
+print('status / dates from VisiLean for', vl_n, 'of', len(T), 'activities')
 json.dump({'data_date': DD.isoformat(), 'status': status_count, 'delayed': delayed_n, 'linked': linked, 'activities': report},
           open(REPORT, 'w'), indent=1)
