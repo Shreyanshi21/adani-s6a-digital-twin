@@ -1,6 +1,6 @@
 """Link P6 (XER) activities to IFC elements, with VisiLean status, location = P6 WBS (VisiLean location breakdown).
 
-usage: link_schedule.py model_in.ifc schedule.xer model_out.ifc link_report.json
+usage: link_schedule.py model_in.ifc schedule.xer model_out.ifc link_report.json [baseline.xer]
 Adds: IfcWorkSchedule, IfcTask per WBS node (summary) and per activity, IfcTaskTime, IfcRelNests (location tree),
 IfcRelAssignsToControl (tasks -> schedule), IfcRelAssignsToProcess (activity -> model elements), Pset VL_Activity.
 """
@@ -10,8 +10,12 @@ sys.path.insert(0, __file__.rsplit('\\', 1)[0] if '\\' in __file__ else __file__
 from xer import parse_xer
 
 IFC_IN, XER, IFC_OUT, REPORT = sys.argv[1:5]
+BASE = sys.argv[5] if len(sys.argv) > 5 else None
 f = ifcopenshell.open(IFC_IN)
 x = parse_xer(XER)
+# baseline = planned dates of an earlier XER (P6 resets the planned dates of not-started activities on every update)
+base = {t['task_code']: t for t in parse_xer(BASE)['TASK']} if BASE else {}
+print('baseline', BASE or 'none', len(base), 'activities')
 G = ifcopenshell.guid.new
 C = f.create_entity
 
@@ -81,8 +85,8 @@ ACT_ROLE = [
     (r'^Module|^DC Cable|^VOC', 'mod'),
     (r'^Piling - Inverters', 'invs'),
     (r'^Inverter Installation|^LT Cable Terminations - Inverter', 'inv'),
-    (r'^IDT Foundation|^HT & LT Station - Slab|^NIFPS|^BOT Foundation', 'plinth'),
-    (r'^IDT (Erection|Filtration|Testing)|^HT Cable Terminations|^LT Cable Terminations - LT Panel To IDT', 'idt'),
+    (r'^IDT Foundation|^HT & LT Station - Slab|^NIFPS Foundation|^BOT Foundation|^Aux Transformer Foundation', 'plinth'),
+    (r'^IDT (Erection|Filtration|Testing)|^NIFPS - Installation|^HT Cable Terminations|^LT Cable Terminations - LT Panel To IDT', 'idt'),
     (r'^HT & LT Station - (Shed|Sheeting)|^HT LT Station - Staircase|^HT Panel', 'ht'),
     (r'^LT Panel|^ACDB|^SCADA', 'lt'),
     (r'^Aux Transformer', 'aux'),
@@ -145,10 +149,13 @@ for t in T:
     nest[t['wbs_id']].append(task)
     status_count[st] += 1
     tf = t.get('total_float_hr_cnt')
+    b = base.get(t['task_code'])
+    bs, bf = (pdate(b['target_start_date']), pdate(b['target_end_date'])) if b else (ps, pf)
     pset('VL_Activity', {'ActivityID': t['task_code'], 'VisiLeanLocation': loc, 'VisiLeanStatus': st,
                          'P6Status': t['status_code'].replace('TK_', ''), 'PercentComplete': pct, 'Delayed': bool(delayed),
                          'TotalFloat_days': round(float(tf) / 8.0, 1) if tf not in (None, '') else None,
-                         'DataDate': DD.strftime('%d %b %Y')}, task)
+                         'DataDate': DD.strftime('%d %b %Y'), 'BaselineStart': iso(bs), 'BaselineFinish': iso(bf),
+                         'BaselineSource': BASE.replace(chr(92), '/').split('/')[-1] if b else 'current XER (not in baseline)'}, task)
     # ---- element links
     objs = []
     chain = [w['wbs_name'] for w in wbs_chain(t['wbs_id'])]

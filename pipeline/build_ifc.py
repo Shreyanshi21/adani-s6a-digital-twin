@@ -125,6 +125,8 @@ S = {
     'concrete': style('Concrete', (0.70, 0.69, 0.66)),
     'road': style('WBM / gravel road', (0.66, 0.60, 0.50)),
     'road_main': style('Asphalt road', (0.17, 0.17, 0.18)),
+    'road_int': style('Internal road - compacted WBM (grey)', (0.50, 0.49, 0.46)),
+    'road_app': style('Approach road - WBM (dark grey)', (0.34, 0.34, 0.36)),
     'terrain': style('Terrain - desert sand', (0.87, 0.76, 0.58)),
     'gravel': style('Switchyard gravel', (0.62, 0.62, 0.60)),
     'xfmr': style('Transformer (RAL 7032)', (0.66, 0.67, 0.62)),
@@ -481,7 +483,10 @@ def poly_el(cls, name, polys, z0, h, st, sp, sp_pl, ptype='USERDEFINED', otype=N
         e.ObjectType = otype
     return e
 
-poly_el('IfcCivilElement', 'S6a Internal Roads (ICR access)', F['s6a']['roads_internal'], 0.0, 0.25, S['road'], s6c, s6c_pl, otype='ROAD')
+# internal roads run E-W along the ICR rows; approach roads are the N-S links to the peripheral plant road
+# (approach sits 5 cm higher so the two surfaces don't fight where they meet)
+poly_el('IfcCivilElement', 'S6a Internal Roads', F['s6a']['roads_internal'], 0.0, 0.30, S['road_int'], s6c, s6c_pl, otype='ROAD - INTERNAL')
+poly_el('IfcCivilElement', 'S6a Approach Roads (plant road to ICR)', F['s6a'].get('roads_approach', []), 0.0, 0.35, S['road_app'], s6c, s6c_pl, otype='ROAD - APPROACH')
 poly_el('IfcCivilElement', 'S6a Peripheral Plant Road', F['s6a']['roads_plant'], 0.0, 0.25, S['road_main'], s6c, s6c_pl, otype='ROAD')
 poly_el('IfcCivilElement', 'WTG Access Roads (S6a area)', F['s6a']['roads_wtg'], 0.0, 0.22, S['road'], s6c, s6c_pl, otype='ROAD')
 poly_el('IfcCivilElement', 'WTG Crane Hardstands (S6a area)', F['s6a']['crane_pads'], 0.0, 0.2, S['crane'], s6c, s6c_pl, otype='HARDSTAND')

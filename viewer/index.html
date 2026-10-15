@@ -87,6 +87,52 @@
   .sch-in { width: 100%; padding: 5px 7px; border: 1px solid var(--line); border-radius: 6px; font: inherit; background: #fff; margin-bottom: 6px; }
   .sch-filters { display: flex; gap: 6px; } .sch-filters .sch-in { flex: 1; min-width: 0; }
   .chk { display: flex; gap: 6px; align-items: center; font-size: 12px; margin: 4px 0; cursor: pointer; }
+  /* element filter at the top of the Model tree tab */
+  .efilter { padding: 8px 10px 6px; border-bottom: 1px solid var(--line); background: #fafbfc; position: sticky; top: -6px; z-index: 1; }
+  .efilter .frow { display: flex; gap: 6px; align-items: flex-start; } .efilter .frow .sch-in { flex: 1; min-width: 0; margin-bottom: 5px; }
+  .efilter .fclr { flex: none; padding: 5px 9px; border: 1px solid var(--line); background: #fff; border-radius: 6px; cursor: pointer; font: inherit; }
+  .efilter .fclr:hover { background: #eef1f4; }
+  #fInfo { font-size: 11.5px; } #fInfo b { color: var(--text); }
+  #fList { max-height: 160px; overflow: auto; margin-top: 4px; border-top: 1px solid var(--line); }
+  #fList:empty { display: none; }
+  /* classes tab: square visibility checkboxes + select all */
+  .row input.eye { opacity: 1; width: 14px; height: 14px; margin: 0 4px 0 2px; cursor: pointer; accent-color: var(--accent); flex: none; }
+  .row.selall { border-bottom: 1px solid var(--line); padding: 5px 8px; margin-bottom: 2px; font-weight: 600; }
+  /* activity list dialog */
+  .dlg { position: absolute; inset: 0; z-index: 6; background: rgba(20,33,61,.28); display: flex; align-items: center; justify-content: center; padding: 18px; }
+  .dlg[hidden] { display: none; }
+  .dlg-card { background: var(--panel); border-radius: 10px; box-shadow: 0 12px 40px rgba(0,0,0,.25); width: min(1100px, 100%); max-height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+  .dlg-head { display: flex; gap: 10px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  .dlg-head .ttl { flex: 1; min-width: 0; } .dlg-head .sch-in { width: 260px; margin: 0; }
+  .dlg-body { overflow: auto; }
+  .dlg-t { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .dlg-t th { position: sticky; top: 0; background: #f6f8fa; text-align: left; font-weight: 600; color: var(--muted); padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .dlg-t td { padding: 6px 8px; border-bottom: 1px solid #f0f1f3; vertical-align: top; }
+  .dlg-t td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .dlg-t tbody tr { cursor: pointer; } .dlg-t tbody tr:hover { background: #f6f8fa; } .dlg-t tbody tr.sel { background: var(--accent-soft); }
+  .dlg-foot { padding: 8px 14px; border-top: 1px solid var(--line); font-size: 11.5px; color: var(--muted); }
+  /* 4D timeline */
+  #timeline { position: absolute; left: 12px; right: 12px; bottom: 12px; z-index: 4; background: rgba(255,255,255,.97); border: 1px solid var(--line);
+    border-radius: 10px; padding: 8px 10px; box-shadow: 0 6px 24px rgba(0,0,0,.12); }
+  #timeline[hidden] { display: none; }
+  #view.tl-on #legend, #view.tl-on #measure { bottom: 178px; }
+  .tl-row { display: flex; align-items: center; gap: 8px; }
+  .tl-mode { display: flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; flex: none; }
+  .tl-mode button { border: 0; background: #fff; padding: 5px 10px; font: inherit; cursor: pointer; color: var(--muted); }
+  .tl-mode button.on { background: var(--top); color: #fff; }
+  .tl-b { border: 1px solid var(--line); background: #fff; border-radius: 6px; padding: 4px 9px; cursor: pointer; font: inherit; flex: none; }
+  .tl-b:hover { background: #eef1f4; }
+  #tlSlider { flex: 1; min-width: 80px; accent-color: var(--accent); }
+  .tl-date { font-weight: 600; min-width: 150px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .tl-sel { border: 1px solid var(--line); border-radius: 6px; padding: 4px; font: inherit; background: #fff; flex: none; }
+  .tl-row2 { display: flex; gap: 12px; margin-top: 6px; align-items: stretch; }
+  #tlChart { flex: 1; min-width: 0; height: 104px; display: block; }
+  .tl-legend { width: 300px; flex: none; font-size: 12px; }
+  .tl-legend .it { display: flex; align-items: center; gap: 6px; padding: 1px 4px; border-radius: 4px; cursor: pointer; }
+  .tl-legend .it:hover { background: #f1f3f5; }
+  .tl-legend .it b { margin-left: auto; font-variant-numeric: tabular-nums; }
+  .tl-legend .sw { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+  .tl-legend .hd { font-weight: 600; margin-bottom: 3px; }
   .sch-btn { width: 100%; margin-top: 6px; padding: 6px; border: 1px solid var(--line); background: #f6f8fa; border-radius: 6px; cursor: pointer; font: inherit; }
   .sch-btn:hover { background: #eef1f4; }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -128,6 +174,9 @@
     <button class="btn on" id="bShadow" title="Sun shadows (S)">Shadows</button>
     <button class="btn on" id="bAnim" title="Spin wind turbine rotors">Turbines</button>
     <button class="btn on" id="bLabels" title="Show labels (L)">Labels</button>
+    <button class="btn on" id="bFocus" title="Focus: draw the selection solid and fade everything else (G)">Focus</button>
+    <button class="btn" id="bSim" style="display:none" title="4D simulation: play the construction sequence over time">4D Simulation</button>
+    <button class="btn" id="bPva" style="display:none" title="Planned vs Actual: baseline plan compared with actual progress">Planned vs Actual</button>
     <select class="btn" id="views" title="Zoom to"><option value="">Zoom to…</option></select>
     <button class="btn" id="bFit" title="Fit whole model (F)">Fit</button>
     <button class="btn" id="bTop" title="Top view (T)">Top</button>
@@ -136,6 +185,7 @@
       <option value="status" id="optStatus" disabled>Colours: VisiLean status</option>
       <option value="container">Colours: by block / container</option>
       <option value="class">Colours: by IFC class</option>
+      <option value="timeline" hidden>Colours: 4D timeline</option>
     </select>
     <button class="btn" id="bIso" title="Isolate selection (I)">Isolate</button>
     <button class="btn" id="bHide" title="Hide selection (H)">Hide</button>
@@ -154,7 +204,7 @@
         <div id="schSource" class="sch-src"></div>
       </div>
       <div class="sch-sec">
-        <div class="sch-lab">Activities by VisiLean status <span class="muted">· click to select linked elements</span></div>
+        <div class="sch-lab">Activities by VisiLean status <span class="muted">· click for the list of activities</span></div>
         <div id="schChips" class="chips"></div>
       </div>
       <div class="sch-sec">
@@ -166,17 +216,23 @@
         <input type="file" id="schCsvFile" accept=".csv,text/csv" hidden>
       </div>
       <div class="sch-sec">
-        <div class="sch-lab">Activities</div>
-        <div class="sch-filters">
-          <select id="schLoc" class="sch-in"><option value="">All locations</option></select>
-          <select id="schStat" class="sch-in"><option value="">All statuses</option></select>
-        </div>
-        <input id="schQ" class="sch-in" placeholder="Search activity ID or name">
-        <div id="schCount" class="muted" style="margin:4px 0"></div>
+        <div class="sch-lab">Filter linked elements <span class="muted">· highlights matches, fades the rest</span></div>
+        <select id="schStat" class="sch-in" title="VisiLean status"><option value="">All VisiLean statuses</option></select>
+        <select id="schLoc" class="sch-in" title="VisiLean location"><option value="">All locations</option></select>
+        <select id="schKind" class="sch-in" title="Element type"><option value="">All element types</option></select>
+        <div style="display:flex;gap:6px;align-items:flex-start"><div id="schFInfo" class="muted" style="flex:1;font-size:11.5px"></div><button id="schFClear" class="fclr" title="Clear filter and selection">Clear</button></div>
       </div>
-      <div id="schList"></div>
     </div>
-    <div class="pane on" id="p-tree"></div>
+    <div class="pane on" id="p-tree">
+      <div class="efilter">
+        <div class="sch-lab">Filter elements <span class="muted">· highlights matches, fades the rest</span></div>
+        <div class="frow"><select id="fKind" class="sch-in" title="Element type"></select><select id="fBlock" class="sch-in" title="Block"></select></div>
+        <div class="frow"><input id="fName" class="sch-in" placeholder="Name contains… e.g. INV05, T0012"><button id="fClear" class="fclr" title="Clear filter and selection">Clear</button></div>
+        <div id="fInfo" class="muted"></div>
+        <div id="fList"></div>
+      </div>
+      <div id="treeRoot"></div>
+    </div>
     <div class="pane" id="p-classes"></div>
     <div class="pane" id="p-find"><div class="search"><input id="q" placeholder="Name or tag, e.g. S6a-B07-T0012, ICR-05, WTG-101"></div><div id="results"></div></div>
   </aside>
@@ -189,11 +245,29 @@
     </div></div>
     <div id="measure"></div>
     <div id="legend"></div>
+    <div id="taskDlg" class="dlg" hidden><div class="dlg-card">
+      <div class="dlg-head"><div class="ttl"><div class="eyebrow">VisiLean activities</div><div id="dlgTitle" class="sch-title"></div></div>
+        <input id="dlgQ" class="sch-in" placeholder="Search activity ID, name or location"><button id="dlgClose" class="fclr" title="Close (Esc)">✕</button></div>
+      <div class="dlg-body"><table class="dlg-t"><thead><tr><th>Status</th><th>Activity ID</th><th>Activity</th><th>Location</th><th>Baseline start → finish</th><th>Actual / forecast start → finish</th><th>%</th><th>Elements</th></tr></thead><tbody id="dlgRows"></tbody></table></div>
+      <div class="dlg-foot" id="dlgFoot"></div>
+    </div></div>
+    <div id="timeline" hidden>
+      <div class="tl-row">
+        <div class="tl-mode"><button data-m="sim">4D Simulation</button><button data-m="pva">Planned vs Actual</button></div>
+        <button id="tlPlay" class="tl-b" title="Play / pause">▶ Play</button>
+        <button id="tlDD" class="tl-b" title="Jump to the schedule data date">Data date</button>
+        <input type="range" id="tlSlider" min="0" max="100" step="1" title="Drag to change the date">
+        <div id="tlDate" class="tl-date"></div>
+        <select id="tlSpeed" class="tl-sel" title="Step per frame while playing"><option value="1">1 day / step</option><option value="7" selected>1 week / step</option><option value="30">1 month / step</option></select>
+        <button id="tlClose" class="tl-b" title="Close the timeline">✕</button>
+      </div>
+      <div class="tl-row2"><canvas id="tlChart"></canvas><div id="tlLegend" class="tl-legend"></div></div>
+    </div>
   </main>
   <aside class="right" id="right"><div class="props" id="props"><p class="muted">Click an element in the 3D view or the tree to see its properties.</p>
     <h3>Navigation</h3>
     <p class="muted">Left-drag rotate · Right-drag pan · Mouse wheel zooms in/out on the point under the cursor<br>Double-click: fly in to that spot<br>
-    <kbd>F</kbd> fit · <kbd>T</kbd> top · <kbd>I</kbd> isolate · <kbd>H</kbd> hide · <kbd>A</kbd> show all · <kbd>M</kbd> measure · <kbd>Esc</kbd> clear</p></div></aside>
+    <kbd>F</kbd> fit · <kbd>T</kbd> top · <kbd>G</kbd> focus on/off · <kbd>I</kbd> isolate · <kbd>H</kbd> hide · <kbd>A</kbd> show all · <kbd>M</kbd> measure · <kbd>Esc</kbd> clear</p></div></aside>
   <footer><span id="stStats">–</span><span id="stPick"></span><span class="sp" style="flex:1"></span><span id="stCrs"></span></footer>
 </div>
 
@@ -280,6 +354,7 @@ function buildSky() {
 }
 buildSky();
 let realistic = true, shadowsOn = true, animateOn = true;
+let focusOn = true, focusActive = false;      // focus mode: selection solid, rest faded (see refreshFocus)
 function applyEnvironment() {
   scene.background = realistic ? skyCube : skyColor;
   scene.environment = realistic ? envMap : null;
@@ -287,7 +362,7 @@ function applyEnvironment() {
   renderer.toneMapping = realistic ? THREE.ACESFilmicToneMapping : THREE.NoToneMapping;
   hemi.intensity = realistic ? 0.55 : 1.15;
   sun.intensity = realistic ? 2.6 : 1.6;
-  sun.castShadow = realistic && shadowsOn;
+  sun.castShadow = realistic && shadowsOn && !focusActive;
   needsRender = true; shadowDirty = true;
 }
 function updateSun() {
@@ -630,12 +705,14 @@ async function finishLoad() {
   applyEnvironment();
   setOverlay(null, 'Linking schedule activities', 0.93); await sleep(10);
   const hasSched = readSchedule();
-  if (hasSched) { buildScheduleUI(); colorMode = 'status'; $('tabSched').click(); }
-  else { $('tabSched').style.display = 'none'; $('optStatus').disabled = true; if (colorMode === 'status') colorMode = 'ifc'; }
-  applyColorMode(colorMode);
+  if (hasSched) buildScheduleUI();
+  else { $('tabSched').style.display = 'none'; $('optStatus').disabled = true; }
+  // Every model opens on IFC material colours with the Model tree tab active
+  applyColorMode('ifc');
+  document.querySelector('.tabs button[data-t="tree"]').click();
   setOverlay(null, 'Placing labels', 0.95); await sleep(10);
   buildTags();
-  buildTreeUI(); buildClassesUI(); buildViewsMenu();
+  buildTreeUI(); buildFilterUI(); buildClassesUI(); buildViewsMenu();
   fitAll();
   updateStats();
   hideOverlay();
@@ -649,7 +726,8 @@ function clearModel() {
   rotors.length = 0; tour = null; uvCache.clear(); tagList.length = 0; lodFar = null; compCache.clear(); sceneRadius.v = null;
   hiddenBy4D.clear(); sched.tasks = []; sched.byId.clear(); sched.elemTasks.clear(); sched.wp = ''; sched.built = false;
   if (modelID >= 0) { try { ifc.CloseModel(modelID); } catch (e) {} modelID = -1; }
-  $('p-tree').innerHTML = ''; $('p-classes').innerHTML = ''; $('results').innerHTML = '';
+  clearHighlight(); focusActive = false; tlReset(); closeTaskDialog();
+  $('treeRoot').innerHTML = ''; $('p-classes').innerHTML = ''; $('results').innerHTML = '';
 }
 
 function readGeoref() {
@@ -1054,7 +1132,7 @@ function buildMerged(list, trans, cat = 'std') {
         eidA[vo+i] = p.eid;
       }
       for (let i = 0; i < g.idx.length; i++) idx[io+i] = g.idx[i] + vo;
-      elem(p.eid).parts.push({ mesh, start: vo, count: cnt, cat });
+      elem(p.eid).parts.push({ mesh, start: vo, count: cnt, istart: io, icount: g.idx.length, cat });
       vo += cnt; io += g.idx.length;
     }
     const geo = mesh.geometry;
@@ -1078,6 +1156,7 @@ function setRealistic(on) {
   for (const m of meshes) m.material = getMat(m.userData.cat, m.userData.kind === 'merged', m.userData.trans);
   applyEnvironment();
   for (const eid of elements.keys()) repaintElement(eid);
+  if (focusActive) refreshFocus();
   $('bReal').classList.toggle('on', on); $('bShadow').disabled = !on;
   needsRender = true;
 }
@@ -1184,6 +1263,26 @@ function quickBox(eid) {
   for (const p of pick) box.union(partBox(p, _b2));
   return box;
 }
+// [name pattern, label, spacing between labels (m), visible up to (m)]
+const ROAD_LABELS = [
+  [/^S6a Internal Roads/, 'Internal road', 320, 2600],
+  [/^S6a Approach Roads/, 'Approach road', 160, 2600],
+  [/^S6a Peripheral Plant Road/, 'Peripheral plant road', 700, 4000],
+  [/^WTG Access Roads/, 'WTG access road', 700, 2600],
+];
+function roadLabelPoints(eid, spacing) {
+  const pts = [], s2 = spacing * spacing, v = new THREE.Vector3();
+  for (const p of elements.get(eid).parts) {
+    if (p.mesh.userData.kind !== 'merged') continue;
+    const P = p.mesh.userData.pos0;
+    for (let i = p.start; i < p.start + p.count; i += 2) {
+      v.set(P[i * 3], P[i * 3 + 1], P[i * 3 + 2]);
+      if (pts.every(q => q.distanceToSquared(v) > s2)) pts.push(v.clone());
+      if (pts.length >= 40) return pts;
+    }
+  }
+  return pts;
+}
 function buildTags() {
   tagList.length = 0;
   const groups = new Map();           // key -> {text, lvl, maxDist, eids, box}
@@ -1209,6 +1308,11 @@ function buildTags() {
     if (t === 'IfcElectricGenerator') { add('wtg:' + eid, tag || name.split(' ')[0], 2, 6500, eid, box); continue; }
     if (/^TWR-/.test(tag)) { add('twr:' + eid, tag, 2, 1600, eid, box); continue; }
     if (t === 'IfcGeographicElement' && /zone|terrain|ground/i.test(name)) continue;
+    const road = t === 'IfcCivilElement' && ROAD_LABELS.find(r => r[0].test(name));
+    if (road) {                                          // roads are long and branched: several labels spread along them
+      roadLabelPoints(eid, road[2]).forEach((v, k) => add(`road:${eid}:${k}`, road[1], 2, road[3], eid, new THREE.Box3(v, v.clone())));
+      continue;
+    }
     if (diag > 2500) {                                   // very large elements: one label, visible from far
       if (t === 'IfcSolarDevice') add('big:' + eid, short(name.split(' - ')[0]), 1, 40000, eid, box);
       continue;
@@ -1326,7 +1430,7 @@ function normStatus(s) {
     'started': 'Started', 'in progress': 'Started', 'complete': 'Complete', 'completed': 'Complete' };
   return map[t] || null;
 }
-function workType(name) { return String(name || '').replace(/^Block-\d+\s*-\s*/i, '').replace(/\s+/g, ' ').trim(); }
+function workType(name) { return String(name || '').replace(/^Block-\d+\s*-\s*/i, '').replace(/\s+/g, ' ').replace(/ to /gi, ' To ').trim(); }
 function readSchedule() {
   sched.tasks = []; sched.byId.clear(); sched.elemTasks.clear(); sched.source = 'P6'; sched.dataDate = null;
   if (META) {
@@ -1349,7 +1453,7 @@ function readSchedule() {
     let tt = null; try { if (l.TaskTime) tt = ifc.GetLine(modelID, l.TaskTime.value); } catch (e) {}
     const t = { id: l.expressID, code: l.Identification?.value || '', name: l.Name?.value || '', loc: l.Description?.value || '',
       p6status: normStatus(l.Status?.value) || 'Not Ready', ps: tt?.ScheduleStart?.value, pf: tt?.ScheduleFinish?.value,
-      as: tt?.ActualStart?.value, af: tt?.ActualFinish?.value, pct: tt?.Completion ? Math.round(tt.Completion.value * 100) : 0,
+      as: tt?.ActualStart?.value, af: tt?.ActualFinish?.value, es: tt?.EarlyStart?.value, ef: tt?.EarlyFinish?.value, pct: tt?.Completion ? Math.round(tt.Completion.value * 100) : 0,
       dd: tt?.StatusTime?.value, mile: !!l.IsMilestone?.value, elems: [] };
     t.status = t.p6status; t.type = workType(t.name);
     if (t.dd && !sched.dataDate) sched.dataDate = t.dd;
@@ -1402,12 +1506,19 @@ function buildScheduleUI() {
   for (const t of sched.tasks) if (t.elems.length && /BLOCK-\d+/i.test(t.loc)) types.set(t.type, (types.get(t.type) || 0) + 1);
   $('schWp').innerHTML = '<option value="">All linked activities (roll-up)</option>' +
     [...types.keys()].map(k => `<option value="${escapeHtml(k)}">${escapeHtml(k)}</option>`).join('');
-  // location filter = VisiLean location (WBS) at block level
-  const locs = new Set();
-  for (const t of sched.tasks) { const m = t.loc.match(/^(.*?BLOCK-\d+)/i); locs.add(m ? m[1] : t.loc.split(' > ').slice(0, 2).join(' > ')); }
-  $('schLoc').innerHTML = '<option value="">All locations</option>' + [...locs].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
-    .map(l => `<option value="${escapeHtml(l)}">${escapeHtml(l.replace('CONSTRUCTION & COMMISIONING > ', ''))}</option>`).join('');
-  $('schStat').innerHTML = '<option value="">All statuses</option>' + VL_ORDER.map(s => `<option>${s}</option>`).join('') + '<option value="__late">Delayed only</option>';
+  // element filter: VisiLean status, location (phase / block of the linked activities), element type (filled in buildFilterUI)
+  $('schStat').innerHTML = '<option value="">All VisiLean statuses</option>' + VL_ORDER.map(s => `<option>${s}</option>`).join('') + '<option value="__late">Delayed</option>';
+  const locs = new Map();
+  for (const t of sched.tasks) if (t.elems.length) {
+    const parts = t.loc.split(' > '), i = parts.findIndex(p => /^PHASE-/i.test(p));
+    if (i < 0) { locs.set(t.loc, parts[parts.length - 1]); continue; }
+    locs.set(parts.slice(0, i + 1).join(' > '), parts[i]);
+    if (parts[i + 1]) locs.set(parts.slice(0, i + 2).join(' > '), '\u00a0\u00a0\u00a0' + parts[i + 1]);
+  }
+  $('schLoc').innerHTML = '<option value="">All locations</option>' + [...locs.entries()].sort((a, b) => a[0].localeCompare(b[0], undefined, { numeric: true }))
+    .map(([k, l]) => `<option value="${escapeHtml(k)}">${escapeHtml(l)}</option>`).join('');
+  $('schFInfo').textContent = 'Pick a status, location and/or element type.';
+  $('bSim').style.display = ''; $('bPva').style.display = '';
   refreshScheduleUI();
 }
 function refreshScheduleUI() {
@@ -1417,41 +1528,108 @@ function refreshScheduleUI() {
     `<span class="chip" data-s="__late" tabindex="0"><span class="vl late">Delayed</span><b>${late}</b></span>`;
   $('schChips').querySelectorAll('.chip').forEach(c => c.onclick = () => {
     const s = c.dataset.s;
-    const ids = new Set();
-    for (const t of sched.tasks) if ((s === '__late' ? t.delayed : t.status === s) && (!sched.wp || t.type === sched.wp)) t.elems.forEach(e => ids.add(e));
-    $('schStat').value = s; renderActivityList();
-    if (ids.size) select([...ids], true);
+    openTaskDialog(s === '__late' ? 'Delayed activities' : `${s} activities`, sched.tasks.filter(t => s === '__late' ? t.delayed : t.status === s));
   });
   $('schSource').innerHTML = sched.source === 'P6'
     ? '<span class="muted">Status derived from P6 progress &amp; logic. Load a VisiLean export to use live VisiLean statuses.</span>'
     : `<span style="color:var(--vl-cp);font-weight:600">✓ ${escapeHtml(sched.source)}</span>`;
-  renderActivityList();
+  if ($('schStat').value || $('schLoc').value || $('schKind').value) applySchedFilter();
 }
-function renderActivityList() {
-  const loc = $('schLoc').value, st = $('schStat').value, q = $('schQ').value.trim().toLowerCase();
-  const rows = sched.tasks.filter(t => (!loc || t.loc.startsWith(loc)) && (!st || (st === '__late' ? t.delayed : t.status === st)) &&
-    (!sched.wp || t.type === sched.wp) && (!q || (t.code + ' ' + t.name).toLowerCase().includes(q)));
-  $('schCount').textContent = `${rows.length.toLocaleString('en-IN')} activit${rows.length === 1 ? 'y' : 'ies'}` + (rows.length > 400 ? ' · showing first 400' : '');
-  $('schList').innerHTML = rows.length ? rows.slice(0, 400).map(t => `<div class="arow" data-t="${t.id}">
-      <div class="l1">${chip(t.status)}${t.delayed ? '<span class="vl late">Delayed</span>' : ''}<span class="id">${escapeHtml(t.code)}</span></div>
-      <div class="nm2">${escapeHtml(t.name)}</div>
-      <div class="dt">${fmtD(t.ps)} → ${fmtD(t.pf)} · ${t.pct}%${t.elems.length ? ` · ${t.elems.length.toLocaleString('en-IN')} element${t.elems.length === 1 ? '' : 's'}` : ' · <span class="nolink">not in model</span>'}</div>
-    </div>`).join('') : '<p class="muted" style="padding:8px 12px">No activities match the selected location, status and search.</p>';
-  $('schList').querySelectorAll('.arow').forEach(r => r.onclick = () => {
+// ---- element filter in the Schedule tab
+function inLoc(loc, key) { return loc === key || loc.startsWith(key + ' > '); }
+function schedFilterIds() {
+  const st = $('schStat').value, loc = $('schLoc').value, kind = $('schKind').value;
+  let ids = kind ? kindIndex.get(kind) || [] : [...sched.elemTasks.keys()];
+  ids = ids.filter(id => sched.elemTasks.has(id) && elements.has(id) && !elements.get(id).hidden);
+  if (loc) ids = ids.filter(id => sched.elemTasks.get(id).some(t => inLoc(t.loc, loc)));
+  if (st) ids = ids.filter(id => st === '__late' ? elemDelayed(id) : elemStatus(id) === st);
+  return ids;
+}
+function schedFilterTasks(ids) {
+  const st = $('schStat').value, loc = $('schLoc').value, kind = $('schKind').value;
+  const inKind = kind ? new Set(ids) : null;
+  return sched.tasks.filter(t => t.elems.length && (!sched.wp || t.type === sched.wp) && (!loc || inLoc(t.loc, loc)) &&
+    (!st || (st === '__late' ? t.delayed : t.status === st)) && (!inKind || t.elems.some(e => inKind.has(e))));
+}
+function applySchedFilter() {
+  const st = $('schStat').value, loc = $('schLoc').value, kind = $('schKind').value;
+  if (!st && !loc && !kind) { $('schFInfo').textContent = 'Pick a status, location and/or element type.'; select([]); return; }
+  const ids = schedFilterIds(), tasks = schedFilterTasks(ids);
+  $('schFInfo').innerHTML = `<b style="color:var(--text)">${ids.length.toLocaleString('en-IN')}</b> element${ids.length === 1 ? '' : 's'} · ` +
+    (tasks.length ? `<a href="#" id="schFList">${tasks.length.toLocaleString('en-IN')} activit${tasks.length === 1 ? 'y' : 'ies'}</a>` : 'no activities') +
+    (ids.length > FOCUS_MAX ? ' · shown in orange' : '');
+  const a = $('schFList');
+  if (a) a.onclick = (ev) => { ev.preventDefault(); openTaskDialog('Activities matching the filter', tasks); };
+  select(ids, ids.length > 0);
+}
+['schStat', 'schLoc', 'schKind'].forEach(id => $(id).onchange = applySchedFilter);
+$('schFClear').onclick = () => { $('schStat').value = ''; $('schLoc').value = ''; $('schKind').value = ''; applySchedFilter(); };
+
+// ---- activity list dialog (opened from the status buttons)
+let dlgTasks = [];
+const shortLoc = (loc) => loc.replace(/^AGE26AL_S06A_FT_234MW_PPA > /, '').replace(/^CONSTRUCTION & COMMISIONING > /, '').split(' > ').slice(-2).join(' › ');
+function openTaskDialog(title, tasks) {
+  dlgTasks = tasks.filter(t => !sched.wp || t.type === sched.wp || !t.elems.length);
+  $('dlgTitle').textContent = title + (sched.wp ? ` · ${sched.wp}` : '');
+  $('dlgQ').value = '';
+  $('taskDlg').hidden = false;
+  renderTaskDialog();
+  $('dlgQ').focus();
+}
+function closeTaskDialog() { $('taskDlg').hidden = true; }
+function renderTaskDialog() {
+  const q = $('dlgQ').value.trim().toLowerCase();
+  const rows = dlgTasks.filter(t => !q || (t.code + ' ' + t.name + ' ' + t.loc).toLowerCase().includes(q));
+  const MAX = 1500;
+  $('dlgRows').innerHTML = rows.slice(0, MAX).map(t => {
+    const T = taskTimes(t);
+    return `<tr data-t="${t.id}"><td>${chip(t.status)}${t.delayed ? '<div style="margin-top:3px"><span class="vl late">Delayed</span></div>' : ''}</td>
+      <td class="n">${escapeHtml(t.code)}</td><td>${escapeHtml(t.name)}</td><td>${escapeHtml(shortLoc(t.loc))}</td>
+      <td class="n">${fmtD(t.bs || t.ps)} → ${fmtD(t.bf || t.pf)}</td>
+      <td class="n">${fmtD(T.s ? new Date(T.s).toISOString() : null)} → ${fmtD(T.f ? new Date(T.f).toISOString() : null)}${t.af ? '' : t.as ? ' <span class="muted">(fc)</span>' : ''}</td>
+      <td class="n">${t.pct}%</td><td class="n">${t.elems.length ? t.elems.length.toLocaleString('en-IN') : '<span class="muted">not in model</span>'}</td></tr>`;
+  }).join('') || '<tr><td colspan="8" class="muted" style="padding:14px">No activities match.</td></tr>';
+  $('dlgFoot').textContent = `${rows.length.toLocaleString('en-IN')} activit${rows.length === 1 ? 'y' : 'ies'}` + (rows.length > MAX ? ` · showing the first ${MAX} (use search)` : '') +
+    ' · click an activity to see its properties and highlight its elements';
+  $('dlgRows').querySelectorAll('tr[data-t]').forEach(r => r.onclick = () => {
     const t = sched.byId.get(+r.dataset.t);
-    document.querySelectorAll('.arow.sel').forEach(x => x.classList.remove('sel')); r.classList.add('sel');
-    if (t.elems.length) select(t.elems, true);
+    $('dlgRows').querySelectorAll('tr.sel').forEach(x => x.classList.remove('sel')); r.classList.add('sel');
+    select(t.elems, t.elems.length > 0);
     showTaskProps(t);
   });
 }
+$('dlgQ').oninput = renderTaskDialog;
+$('dlgClose').onclick = closeTaskDialog;
+$('taskDlg').onclick = (ev) => { if (ev.target === $('taskDlg')) closeTaskDialog(); };
+
 function showTaskProps(t) {
   $('app').classList.add('show-right');
   $('props').innerHTML = `<div class="eyebrow">VisiLean activity</div><h2>${escapeHtml(t.name)}</h2>
     <div style="margin:6px 0">${chip(t.status)} ${t.delayed ? '<span class="vl late">Delayed</span>' : ''}</div>` +
-    table([['Activity ID (External Id)', t.code], ['VisiLean location', t.loc], ['Planned start', fmtD(t.ps)], ['Planned finish', fmtD(t.pf)],
-      ['Actual start', fmtD(t.as)], ['Actual finish', fmtD(t.af)], ['% complete', t.pct + '%'], ['Data date', fmtD(t.dd)],
-      ['Linked model elements', t.elems.length ? t.elems.length.toLocaleString('en-IN') : '— (not modelled)'],
-      ['Status source', sched.source === 'P6' ? 'Derived from P6' : sched.source]]);
+    table([['Activity ID (External Id)', t.code], ['VisiLean location', t.loc], ['% complete', t.pct + '%'], ['Data date', fmtD(t.dd)],
+      ['Status source', sched.source === 'P6' ? 'Derived from P6' : sched.source]]) +
+    '<h3>Dates</h3>' + table([['Baseline start', fmtD(t.bs || t.ps)], ['Baseline finish', fmtD(t.bf || t.pf)],
+      ['Planned start (current)', fmtD(t.ps)], ['Planned finish (current)', fmtD(t.pf)],
+      ['Actual start', fmtD(t.as)], ['Actual finish', fmtD(t.af)],
+      ...(t.af ? [] : [['Forecast start', fmtD(t.es)], ['Forecast finish', fmtD(t.ef)]]),
+      ['Finish vs baseline', finishVariance(t)]]) +
+    '<h3>Linked model elements</h3>' + (t.elems.length ? table(linkedSummary(t)) +
+      `<button class="sch-btn" id="tpZoom">Highlight and zoom to the ${t.elems.length.toLocaleString('en-IN')} element${t.elems.length === 1 ? '' : 's'}</button>`
+      : '<p class="muted">Not linked: this activity has no element in the model (procurement, engineering or a milestone).</p>');
+  const z = $('tpZoom'); if (z) z.onclick = () => select(t.elems, true);
+}
+function finishVariance(t) {
+  const T = taskTimes(t); if (T.f == null || T.bf == null) return '—';
+  const d = Math.round((T.f - T.bf) / DAY);
+  return d === 0 ? 'On baseline' : d > 0 ? `${d} day${d === 1 ? '' : 's'} later than baseline` : `${-d} day${d === -1 ? '' : 's'} earlier than baseline`;
+}
+function linkedSummary(t) {
+  const c = new Map();
+  for (const e of t.elems) {
+    const k = lineName(e).replace(/^S6a-B\d+-(T\d+|INV\d+)\s+/, '').replace(/^S6a-ICR-\d+\s+/, '').replace(/\s*\(.*$/, '').trim() || prettyType(elementType(e));
+    c.set(k, (c.get(k) || 0) + 1);
+  }
+  return [...c.entries()].sort((a, b) => b[1] - a[1]).map(([k, n]) => [k, n.toLocaleString('en-IN')]);
 }
 function linkedActivitiesHtml(eid) {
   const ts = sched.elemTasks.get(eid); if (!ts || !ts.length) return '';
@@ -1475,11 +1653,9 @@ function scheduleChanged() {
   updateDelayed(); refreshScheduleUI(); applyAsBuilt();
   if (colorMode === 'status') applyColorMode('status');
 }
-$('schWp').onchange = (e) => { sched.wp = e.target.value; scheduleChanged(); };
-$('schBuilt').onchange = (e) => { sched.built = e.target.checked; applyAsBuilt(); };
+$('schWp').onchange = (e) => { sched.wp = e.target.value; scheduleChanged(); if (tl.mode) tlRefresh(true); };
+$('schBuilt').onchange = (e) => { if (tl.mode) tlClose(); sched.built = e.target.checked; applyAsBuilt(); };
 $('schDelayed').onchange = (e) => { sched.delayedHl = e.target.checked; if (colorMode === 'status') applyColorMode('status'); };
-['schLoc', 'schStat'].forEach(id => $(id).onchange = renderActivityList);
-$('schQ').oninput = renderActivityList;
 $('schCsv').onclick = () => $('schCsvFile').click();
 $('schCsvFile').onchange = async (e) => {
   const file = e.target.files[0]; e.target.value = ''; if (!file) return;
@@ -1543,6 +1719,7 @@ function hashColor(key) {
 const legendMap = new Map();
 function modeColor(eid, part) {
   const e = elements.get(eid);
+  if (colorMode === 'timeline') return tlColor(eid);
   if (colorMode === 'status') {
     const s = elemStatus(eid);
     if (s) return (sched.delayedHl && elemDelayed(eid)) ? LATE_RGB : VL_RGB[s];
@@ -1576,6 +1753,7 @@ function applyColorMode(mode) {
   $('colorMode').value = mode;
   for (const m of meshes) m.material = getMat(m.userData.cat, m.userData.kind === 'merged', m.userData.trans);
   for (const eid of elements.keys()) repaintElement(eid);
+  if (focusActive) refreshFocus();
   renderLegend(); needsRender = true; shadowDirty = true;
 }
 function renderLegend() {
@@ -1628,7 +1806,12 @@ function setHidden(eid, hidden) {
   }
 }
 const tmpMat = new THREE.Matrix4();
-function refreshVisibilityUI() { document.querySelectorAll('.eye[data-k]').forEach(updateEye); updateStats(); needsRender = true; }
+function refreshVisibilityUI() { document.querySelectorAll('.eye[data-k]').forEach(updateEye); updateClsAll(); updateStats(); if (selected.size) refreshFocus(); needsRender = true; }
+function updateClsAll() {
+  const cb = $('clsAll'); if (!cb) return;
+  let vis = 0; for (const e of elements.values()) if (!e.hidden) vis++;
+  cb.checked = vis === elements.size && vis > 0; cb.indeterminate = vis > 0 && vis < elements.size;
+}
 
 // ---------------------------------------------------------------- selection & properties
 function select(ids, fit = false, add = false) {
@@ -1643,8 +1826,358 @@ function select(ids, fit = false, add = false) {
   if (selected.size === 1) showProps([...selected][0]);
   else if (selected.size > 1) $('props').innerHTML = `<h2>${selected.size} elements selected</h2><p class="muted">Use Isolate / Hide, or click a single element for its properties.</p>`;
   if (fit && selected.size) fitTo([...selected]);
+  refreshFocus();
   needsRender = true;
 }
+
+// ---------------------------------------------------------------- focus: selection drawn solid, everything else faded
+// The model meshes switch to a faint "glass" material; the selected elements are copied into hlRoot with their own colours.
+const FOCUS_MAX = 30000;                 // bigger selections (e.g. the whole plot) keep the plain orange highlight
+const hlRoot = new THREE.Group(); scene.add(hlRoot);
+const GHOST = {
+  solid: new THREE.MeshLambertMaterial({ color: 0xcfd4db, transparent: true, opacity: 0.1, depthWrite: false, side: THREE.DoubleSide }),
+  ground: new THREE.MeshLambertMaterial({ color: 0xe4dac6, side: THREE.DoubleSide }),          // opaque, so highlighted roads on it stay visible
+};
+const HL_MAT = new THREE.MeshStandardMaterial({ vertexColors: true, side: THREE.DoubleSide, roughness: 0.6, metalness: 0.05, envMapIntensity: 0.5,
+  polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 });    // wins over faded faces at the same depth
+function setMeshMaterials() {
+  for (const m of meshes) {
+    const c = m.userData.cat;
+    m.material = focusActive ? (c === 'ground' || c === 'road' ? GHOST.ground : GHOST.solid) : getMat(c, m.userData.kind === 'merged', m.userData.trans);
+  }
+}
+function clearHighlight() {
+  for (const o of hlRoot.children) { if (o.userData.own) o.geometry.dispose(); if (o.isInstancedMesh) o.dispose(); }
+  hlRoot.clear();
+}
+function refreshFocus() {
+  clearHighlight();
+  const ids = [...selected].filter(id => { const e = elements.get(id); return e && !e.hidden && !/^Terrain/i.test(lineName(id)); });
+  focusActive = focusOn && ids.length > 0 && ids.length <= FOCUS_MAX;
+  setMeshMaterials();
+  sun.castShadow = realistic && shadowsOn && !focusActive;        // faded elements must not throw shadows on the highlight
+  if (focusActive) buildHighlight(ids);
+  needsRender = true; shadowDirty = true;
+}
+// flat ground items (roads, pads) read poorly in their own colour against faded sand: highlight them orange
+function highlightColor(eid, p) { if (p.cat === 'road' || p.cat === 'ground') return SEL_RGB; const c = modeColor(eid, p); return c === WHITE ? null : c; }
+function buildHighlight(ids) {
+  const inst = new Map(), merged = new Map();
+  for (const eid of ids) for (const p of elements.get(eid).parts) {
+    const isInst = p.mesh.userData.kind === 'inst';
+    if (isInst && p.mesh.userData.lodRole === 'far') continue;    // far-view stand-ins: the full-detail copy is enough
+    const bucket = isInst ? inst : merged;
+    if (!bucket.has(p.mesh)) bucket.set(p.mesh, []);
+    bucket.get(p.mesh).push([eid, p]);
+  }
+  for (const [m, list] of inst) {
+    const im = new THREE.InstancedMesh(m.geometry, HL_MAT, list.length);
+    list.forEach(([eid, p], k) => {
+      im.setMatrixAt(k, _im4.fromArray(m.userData.base[p.i]));
+      const c = highlightColor(eid, p) || WHITE;
+      im.setColorAt(k, tmpCol.setRGB(c[0], c[1], c[2]));
+    });
+    im.instanceMatrix.needsUpdate = true; im.instanceColor.needsUpdate = true;
+    im.computeBoundingSphere(); im.receiveShadow = true;
+    hlRoot.add(im);
+  }
+  for (const [m, list] of merged) {
+    let nv = 0, ni = 0;
+    for (const [, p] of list) { nv += p.count; ni += p.icount; }
+    const pos = new Float32Array(nv * 3), nrm = new Float32Array(nv * 3), col = new Float32Array(nv * 3), idx = new Uint32Array(ni);
+    const P = m.userData.pos0, N = m.geometry.attributes.normal.array, C0 = m.userData.col0, I = m.geometry.index.array;
+    let vo = 0, io = 0;
+    for (const [eid, p] of list) {
+      pos.set(P.subarray(p.start * 3, (p.start + p.count) * 3), vo * 3);
+      nrm.set(N.subarray(p.start * 3, (p.start + p.count) * 3), vo * 3);
+      const c = highlightColor(eid, p);
+      if (c) for (let i = 0; i < p.count; i++) col.set(c, (vo + i) * 3);
+      else col.set(C0.subarray(p.start * 3, (p.start + p.count) * 3), vo * 3);
+      for (let i = 0; i < p.icount; i++) idx[io + i] = I[p.istart + i] - p.start + vo;
+      vo += p.count; io += p.icount;
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    g.setAttribute('normal', new THREE.BufferAttribute(nrm, 3));
+    g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    g.setIndex(new THREE.BufferAttribute(idx, 1));
+    g.computeBoundingSphere();
+    const mesh = new THREE.Mesh(g, HL_MAT);
+    mesh.userData.own = true; mesh.receiveShadow = true;
+    hlRoot.add(mesh);
+  }
+}
+function setFocus(on) { focusOn = on; $('bFocus').classList.toggle('on', on); refreshFocus(); }
+
+// ---------------------------------------------------------------- 4D timeline: simulation and planned vs actual
+// 4D simulation: an element appears when its first linked activity starts (actual date, else forecast) and turns green when all are finished.
+// Planned vs Actual: at the chosen date each activity is compared with the baseline plan (earlier XER): behind / on track / ahead / not due (hidden).
+const DAY = 86400000;
+const tl = { mode: null, t: 0, t0: 0, t1: 0, dd: 0, timer: 0, state: new Map(), hidden: new Set(), prevMode: 'ifc', elems: [], curve: null };
+const PVA = [
+  { k: 'notdue', label: 'Not due yet (hidden)', hex: '#d5d9de' },
+  { k: 'ontrack', label: 'On track', hex: '#72a64c' },
+  { k: 'ahead', label: 'Ahead of plan', hex: '#2f7fd1' },
+  { k: 'behind', label: 'Behind plan', hex: '#d13636' },
+];
+const PVA_RGB = PVA.map(p => { const c = new THREE.Color(p.hex); return [c.r, c.g, c.b]; });
+const SIM = [
+  { label: 'Not started (hidden)', hex: '#d5d9de' },
+  { label: 'In progress', hex: '#3c007b' },
+  { label: 'Complete', hex: '#72a64c' },
+];
+const msOf = (iso) => { if (!iso) return null; const v = Date.parse(iso); return isNaN(v) ? null : v; };
+function taskTimes(t) {
+  if (!t._tt) {
+    const ps = msOf(t.ps), pf = msOf(t.pf);
+    const s = msOf(t.as) ?? msOf(t.es) ?? ps, f = msOf(t.af) ?? msOf(t.ef) ?? pf;     // actual, else forecast
+    t._tt = { s, f: f ?? s, bs: msOf(t.bs) ?? ps, bf: msOf(t.bf) ?? pf ?? ps };
+  }
+  return t._tt;
+}
+const stAt = (s, f, D) => s == null || D < s ? 0 : (f != null && D >= f ? 2 : 1);
+function pvaTask(t, D) {
+  const T = taskTimes(t), p = stAt(T.bs, T.bf, D), a = stAt(T.s, T.f, D);
+  return p === 0 && a === 0 ? 0 : a > p ? 2 : a < p ? 3 : 1;
+}
+const tlTasks = (eid) => { const ts = sched.elemTasks.get(eid) || []; return sched.wp ? ts.filter(t => t.type === sched.wp) : ts; };
+function tlElemState(eid, D) {
+  const ts = tlTasks(eid);
+  if (!ts.length) return -1;
+  if (tl.mode === 'sim') {
+    let all = true, any = false;
+    for (const t of ts) { const T = taskTimes(t), s = stAt(T.s, T.f, D); if (s < 2) all = false; if (s > 0) any = true; }
+    return all ? 2 : any ? 1 : 0;
+  }
+  let best = 0;
+  for (const t of ts) { const c = pvaTask(t, D); if (c === 3) return 3; if (c > best) best = c; }
+  return best;
+}
+function tlColor(eid) {
+  const e = elements.get(eid);
+  if (/GeographicElement/i.test(elementType(eid))) return e.lodColor || null;
+  const s = tl.state.get(eid);
+  if (s == null || s < 0) return CONTEXT_RGB;
+  if (tl.mode === 'sim') return s === 2 ? VL_RGB['Complete'] : s === 1 ? VL_RGB['Started'] : CONTEXT_RGB;
+  return PVA_RGB[s];
+}
+function tlOpen(mode) {
+  if (!sched.tasks.length) return;
+  if (tl.mode === mode) { tlClose(); return; }
+  if (!tl.mode) {
+    tl.prevMode = colorMode === 'timeline' ? 'ifc' : colorMode;
+    select([]);                                                  // the timeline colours the whole model; nothing should be faded
+    if (sched.built) { sched.built = false; $('schBuilt').checked = false; applyAsBuilt(); }
+    let t0 = Infinity, t1 = -Infinity;
+    for (const t of sched.tasks) { const T = taskTimes(t); for (const v of [T.s, T.f, T.bs, T.bf]) if (v != null) { t0 = Math.min(t0, v); t1 = Math.max(t1, v); } }
+    tl.dd = msOf(sched.dataDate) || Date.now();
+    tl.t0 = Math.floor(t0 / DAY) * DAY; tl.t1 = Math.ceil(t1 / DAY) * DAY;
+    tl.t = Math.min(Math.max(tl.dd, tl.t0), tl.t1);
+    tl.elems = [...sched.elemTasks.keys()].filter(eid => elements.has(eid) && !/GeographicElement/i.test(elementType(eid)));
+    $('tlSlider').max = Math.round((tl.t1 - tl.t0) / DAY);
+    $('timeline').hidden = false; view.classList.add('tl-on');
+  }
+  tl.mode = mode;
+  document.querySelectorAll('.tl-mode button').forEach(b => b.classList.toggle('on', b.dataset.m === mode));
+  $('bSim').classList.toggle('on', mode === 'sim'); $('bPva').classList.toggle('on', mode === 'pva');
+  tlBuildCurve();
+  tlRefresh(true);
+  applyColorMode('timeline');
+}
+function tlUnhide() { for (const eid of tl.hidden) setHidden(eid, false); tl.hidden.clear(); }
+function tlReset() {
+  tlStop(); tlUnhide(); tl.mode = null; tl.state.clear();
+  $('timeline').hidden = true; view.classList.remove('tl-on');
+  $('bSim').classList.remove('on'); $('bPva').classList.remove('on');
+}
+function tlClose() { const back = tl.prevMode; tlReset(); applyColorMode(back); refreshVisibilityUI(); }
+// recompute element states for the current date; repaint / hide only what changed
+function tlRefresh(full = false) {
+  if (!tl.mode) return;
+  if (full) { tlUnhide(); tl.state.clear(); }
+  const D = tl.t, changed = [];
+  for (const eid of tl.elems) {
+    const s = tlElemState(eid, D);
+    if (tl.state.get(eid) !== s) { tl.state.set(eid, s); changed.push(eid); }
+  }
+  for (const eid of changed) {
+    const s = tl.state.get(eid);
+    {                                           // not started (simulation) / not due yet (planned vs actual) -> hidden
+      if (s === 0 && !elements.get(eid).hidden) { setHidden(eid, true); tl.hidden.add(eid); }
+      else if (s !== 0 && tl.hidden.has(eid)) { setHidden(eid, false); tl.hidden.delete(eid); }
+    }
+    repaintElement(eid);
+  }
+  if (changed.length) { needsRender = true; shadowDirty = true; updateStats(); if (selected.size) refreshFocus(); }
+  $('tlSlider').value = Math.round((tl.t - tl.t0) / DAY);
+  const d = new Date(tl.t);
+  $('tlDate').innerHTML = `${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}` +
+    (Math.abs(tl.t - tl.dd) < DAY ? ' <span class="muted">· data date</span>' : tl.t > tl.dd ? ' <span class="muted">· forecast</span>' : '');
+  tlLegend(); tlDrawChart();
+}
+function tlLegend() {
+  const D = tl.t, tasks = sched.tasks.filter(t => (!sched.wp || t.type === sched.wp) && taskTimes(t).s != null);
+  const elCnt = [0, 0, 0, 0]; for (const s of tl.state.values()) if (s >= 0) elCnt[s]++;
+  let html;
+  if (tl.mode === 'sim') {
+    const c = [0, 0, 0]; for (const t of tasks) { const T = taskTimes(t); c[stAt(T.s, T.f, D)]++; }
+    html = `<div class="hd">Activities on this date</div>` + [2, 1, 0].map(i => `<div class="it" data-s="${i}"><span class="sw" style="background:${SIM[i].hex}"></span>${SIM[i].label}<b>${c[i].toLocaleString('en-IN')}</b></div>`).join('') +
+      `<div class="muted" style="margin-top:3px">Model: ${(elCnt[1] + elCnt[2]).toLocaleString('en-IN')} of ${tl.elems.length.toLocaleString('en-IN')} linked elements built or in progress</div>`;
+  } else {
+    const c = [0, 0, 0, 0]; let pDone = 0, aDone = 0;
+    for (const t of tasks) { c[pvaTask(t, D)]++; const T = taskTimes(t); if (T.bf != null && D >= T.bf) pDone++; if (T.f != null && D >= T.f) aDone++; }
+    const pct = (n) => tasks.length ? Math.round(100 * n / tasks.length) : 0;
+    html = `<div class="hd">Activities vs baseline</div>` + [3, 1, 2, 0].map(i => `<div class="it" data-s="${i}" title="Click to highlight the elements"><span class="sw" style="background:${PVA[i].hex}"></span>${PVA[i].label}<b>${c[i].toLocaleString('en-IN')}</b></div>`).join('') +
+      `<div class="muted" style="margin-top:3px">Finished: planned ${pct(pDone)}% · ${tl.t > tl.dd ? 'forecast' : 'actual'} ${pct(aDone)}% of ${tasks.length.toLocaleString('en-IN')}</div>`;
+  }
+  $('tlLegend').innerHTML = html;
+  $('tlLegend').querySelectorAll('.it[data-s]').forEach(it => it.onclick = () => {
+    const s = +it.dataset.s; select(tl.elems.filter(eid => tl.state.get(eid) === s && !elements.get(eid).hidden), true);
+  });
+}
+// cumulative finished activities: baseline plan vs actual (solid, up to the data date) and forecast (dashed)
+function tlBuildCurve() {
+  const tasks = sched.tasks.filter(t => !sched.wp || t.type === sched.wp);
+  const bf = [], f = [];
+  for (const t of tasks) { const T = taskTimes(t); if (T.bf != null) bf.push(T.bf); if (T.f != null) f.push(T.f); }
+  bf.sort((a, b) => a - b); f.sort((a, b) => a - b);
+  tl.curve = { bf, f, n: Math.max(tasks.length, 1) };
+}
+const countLE = (arr, v) => { let lo = 0, hi = arr.length; while (lo < hi) { const m = (lo + hi) >> 1; if (arr[m] <= v) lo = m + 1; else hi = m; } return lo; };
+function tlDrawChart() {
+  const cv = $('tlChart'), dpr = window.devicePixelRatio || 1, W = cv.clientWidth, H = cv.clientHeight;
+  if (!W || !H || !tl.curve) return;
+  if (cv.width !== Math.round(W * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+  const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+  const L = 34, R = 6, T = 6, B = 16, span = tl.t1 - tl.t0 || 1;
+  const X = (v) => L + (W - L - R) * (v - tl.t0) / span, Y = (p) => T + (H - T - B) * (1 - p);
+  g.font = '10px Segoe UI, sans-serif'; g.fillStyle = '#6a737d'; g.strokeStyle = '#e1e4e8'; g.lineWidth = 1;
+  for (const p of [0, 0.5, 1]) { g.beginPath(); g.moveTo(L, Y(p) + .5); g.lineTo(W - R, Y(p) + .5); g.stroke(); g.fillText(Math.round(p * 100) + '%', 4, Y(p) + 3); }
+  for (let d = new Date(tl.t0); d.getTime() <= tl.t1; d.setMonth(d.getMonth() + 1)) {
+    if (d.getMonth() % 2) continue;
+    const x = X(new Date(d.getFullYear(), d.getMonth(), 1).getTime()); if (x < L) continue;
+    g.fillText(`${MON[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`, x - 12, H - 3);
+  }
+  const C = tl.curve, N = 120;
+  const line = (arr, a, b, color, dash) => {
+    g.beginPath(); g.setLineDash(dash || []); g.strokeStyle = color; g.lineWidth = 2;
+    for (let i = 0; i <= N; i++) { const v = a + (b - a) * i / N, x = X(v), y = Y(countLE(arr, v) / C.n); i ? g.lineTo(x, y) : g.moveTo(x, y); }
+    g.stroke(); g.setLineDash([]);
+  };
+  line(C.bf, tl.t0, tl.t1, '#2f7fd1', [5, 3]);
+  line(C.f, tl.t0, Math.min(tl.dd, tl.t1), '#2e7d32');
+  if (tl.dd < tl.t1) line(C.f, tl.dd, tl.t1, '#2e7d32', [2, 3]);
+  g.strokeStyle = '#6a737d'; g.setLineDash([2, 2]); g.beginPath(); g.moveTo(X(tl.dd) + .5, T); g.lineTo(X(tl.dd) + .5, H - B); g.stroke(); g.setLineDash([]);
+  g.strokeStyle = '#ff8a00'; g.lineWidth = 2; g.beginPath(); g.moveTo(X(tl.t), T); g.lineTo(X(tl.t), H - B); g.stroke();
+  // key
+  const key = [['#2f7fd1', 'Baseline plan', [5, 3]], ['#2e7d32', 'Actual', []], ['#2e7d32', 'Forecast', [2, 3]], ['#6a737d', 'Data date', [2, 2]]];
+  let kx = L + 6;
+  for (const [c, t, d] of key) { g.strokeStyle = c; g.lineWidth = 2; g.setLineDash(d); g.beginPath(); g.moveTo(kx, T + 6); g.lineTo(kx + 16, T + 6); g.stroke(); g.setLineDash([]); g.fillStyle = '#1f2328'; g.fillText(t, kx + 20, T + 9); kx += 30 + g.measureText(t).width; }
+  g.fillStyle = '#6a737d'; g.fillText('activities finished (cumulative)', W - R - 150, T + 9);
+}
+function tlStop() { clearInterval(tl.timer); tl.timer = 0; $('tlPlay').textContent = '▶ Play'; }
+function tlPlay() {
+  if (tl.timer) { tlStop(); return; }
+  if (tl.t >= tl.t1) tl.t = tl.t0;
+  $('tlPlay').textContent = '❚❚ Pause';
+  tl.timer = setInterval(() => {
+    tl.t = Math.min(tl.t1, tl.t + (+$('tlSpeed').value) * DAY);
+    tlRefresh();
+    if (tl.t >= tl.t1) tlStop();
+  }, 160);
+}
+$('bSim').onclick = () => tlOpen('sim');
+$('bPva').onclick = () => tlOpen('pva');
+document.querySelectorAll('.tl-mode button').forEach(b => b.onclick = () => { if (tl.mode !== b.dataset.m) tlOpen(b.dataset.m); });
+$('tlPlay').onclick = tlPlay;
+$('tlDD').onclick = () => { tlStop(); tl.t = Math.min(Math.max(tl.dd, tl.t0), tl.t1); tlRefresh(); };
+$('tlClose').onclick = tlClose;
+$('tlSlider').oninput = (e) => { tlStop(); tl.t = tl.t0 + (+e.target.value) * DAY; tlRefresh(); };
+new ResizeObserver(() => { if (tl.mode) tlDrawChart(); }).observe($('tlChart'));
+
+// ---------------------------------------------------------------- element filter (top of the Model tree tab)
+// Each kind is a plain-language element type; an element can belong to several (e.g. a pile is also part of "Tables").
+const KINDS = [
+  ['Tables (piles + MMS + modules)', (n) => /^S6a-B\d+-T\d+ /.test(n)],
+  ['PV modules', (n) => /^S6a-B\d+-T\d+ PV Modules/.test(n)],
+  ['MMS structure', (n) => /^S6a-B\d+-T\d+ MMS Structure/.test(n)],
+  ['Piles', (n) => /^S6a-B\d+-T\d+ Piles/.test(n)],
+  ['String inverters', (n) => /^S6a-B\d+-INV\d+ String Inverter/.test(n)],
+  ['Inverter structures + canopy', (n) => /^S6a-B\d+-INV\d+ Inverter Structure/.test(n)],
+  ['ICR stations (all parts)', (n) => /^S6a-ICR-\d+ /.test(n)],
+  ['IDT transformer', (n) => /^S6a-ICR-\d+ IDT 13/.test(n)],
+  ['HT panel', (n) => /^S6a-ICR-\d+ HT Panel/.test(n)],
+  ['LT panel / ACDB', (n) => /^S6a-ICR-\d+ LT Panel/.test(n)],
+  ['Auxiliary transformer', (n) => /^S6a-ICR-\d+ Auxiliary Transformer/.test(n)],
+  ['IDT station plinth', (n) => /^S6a-ICR-\d+ IDT Station Plinth/.test(n)],
+  ['IDT fencing & gate', (n) => /^S6a-ICR-\d+ IDT Fencing/.test(n)],
+  ['Block zones (ground)', (n) => /Array Zone$/.test(n)],
+  ['All roads', (n, t) => t === 'IfcCivilElement' && /road/i.test(n)],
+  ['Internal roads', (n) => /^S6a Internal Roads/.test(n)],
+  ['Approach roads', (n) => /^S6a Approach Roads/.test(n)],
+  ['Peripheral plant road', (n) => /^S6a Peripheral Plant Road/.test(n)],
+  ['WTG access roads + hardstands', (n) => /^WTG (Access Roads|Crane Hardstands)/.test(n)],
+  ['Plant boundary fence', (n, t) => t === 'IfcRailing' && !/^S6a-ICR/.test(n)],
+  ['Wind turbines (WTG)', (n, t) => t === 'IfcElectricGenerator' || /^WTG-\d+ Rotor/.test(n)],
+  ['400 kV towers + lines', (n, t) => /^TL-400kV/.test(n) || t === 'IfcCableSegment'],
+  ['PSS-10 substation', (n) => /^PSS-10 /.test(n)],
+  ['BESS containers', (n) => /Battery Container|PCS\/MVT Skid/i.test(n)],
+  ['Other pooling substations', (n) => /^PSS-\d+ \(KPS/.test(n)],
+  ['Other solar plots', (n) => /^Solar Plot P\d+/.test(n)],
+];
+const kindIndex = new Map(), blockIndex = new Map();
+function blockOfElem(eid) {
+  for (let nid = elements.get(eid).container; nid != null; ) {
+    const n = spatial.nodes.get(nid); if (!n) break;
+    const m = (n.name || '').match(/^Block-(\d+)/); if (m) return +m[1];
+    nid = n.parent;
+  }
+  return 0;
+}
+function buildFilterUI() {
+  kindIndex.clear(); blockIndex.clear();
+  for (const [label] of KINDS) kindIndex.set(label, []);
+  for (const eid of elements.keys()) {
+    const n = lineName(eid), t = elementType(eid);
+    for (const [label, test] of KINDS) if (test(n, t)) kindIndex.get(label).push(eid);
+    const b = blockOfElem(eid);
+    if (!blockIndex.has(b)) blockIndex.set(b, []);
+    blockIndex.get(b).push(eid);
+  }
+  const fmt = (v) => v.toLocaleString('en-IN');
+  $('fKind').innerHTML = '<option value="">All element types</option>' +
+    KINDS.filter(([l]) => kindIndex.get(l).length).map(([l]) => `<option value="${escapeHtml(l)}">${escapeHtml(l)} (${fmt(kindIndex.get(l).length)})</option>`).join('');
+  const blocks = [...blockIndex.keys()].filter(b => b > 0).sort((a, b) => a - b);
+  $('fBlock').innerHTML = '<option value="">All blocks</option>' +
+    blocks.map(b => `<option value="${b}">Block-${String(b).padStart(2, '0')} · ${phaseOf(b)}</option>`).join('') +
+    (blockIndex.has(0) ? '<option value="0">Outside the blocks</option>' : '');
+  $('fKind').value = ''; $('fBlock').value = ''; $('fName').value = '';
+  if (sched.elemTasks.size) $('schKind').innerHTML = '<option value="">All element types</option>' + KINDS.map(([l]) => [l, kindIndex.get(l).filter(id => sched.elemTasks.has(id)).length])
+    .filter(([, n]) => n).map(([l, n]) => `<option value="${escapeHtml(l)}">${escapeHtml(l)} (${n.toLocaleString('en-IN')})</option>`).join('');
+  $('fInfo').innerHTML = 'Pick a type and/or a block, or type part of a name.'; $('fList').innerHTML = '';
+}
+function applyFilter() {
+  const kind = $('fKind').value, blk = $('fBlock').value, q = $('fName').value.trim().toLowerCase();
+  if (!kind && blk === '' && q.length < 2) { $('fInfo').innerHTML = 'Pick a type and/or a block, or type part of a name.'; $('fList').innerHTML = ''; select([]); return; }
+  let ids = kind ? kindIndex.get(kind) : blk !== '' ? blockIndex.get(+blk) : [...elements.keys()];
+  if (kind && blk !== '') { const inB = new Set(blockIndex.get(+blk) || []); ids = ids.filter(id => inB.has(id)); }
+  if (q.length >= 2) ids = ids.filter(id => (lineName(id) + ' ' + tagOf(id)).toLowerCase().includes(q));
+  ids = ids.filter(id => !elements.get(id).hidden);
+  const what = [kind || (blk === '' ? 'Elements' : 'All elements'), blk === '' ? '' : (blk === '0' ? 'outside the blocks' : `in Block-${String(blk).padStart(2, '0')}`), q.length >= 2 ? `matching “${escapeHtml(q)}”` : ''].filter(Boolean).join(' ');
+  $('fInfo').innerHTML = ids.length
+    ? `<b>${ids.length.toLocaleString('en-IN')}</b> · ${what}${ids.length > FOCUS_MAX ? ' <span title="Too many to fade the rest; shown in orange">(orange)</span>' : ''}`
+    : `No match · ${what}`;
+  const sorted = ids.slice(0, 2000).map(id => [id, lineName(id)]).sort((a, b) => a[1].localeCompare(b[1], undefined, { numeric: true }));
+  $('fList').innerHTML = ids.length > 1 ? sorted.slice(0, 200).map(([id, nm]) => `<div class="row" data-e="${id}"><span class="nm" title="${escapeHtml(nm)}">${escapeHtml(nm || '#' + id)}</span></div>`).join('') +
+    (ids.length > 200 ? `<div class="row muted">… ${(ids.length - 200).toLocaleString('en-IN')} more</div>` : '') : '';
+  $('fList').querySelectorAll('.row[data-e]').forEach(r => { r.onclick = () => select([+r.dataset.e], true); });
+  select(ids, ids.length > 0);
+}
+$('fKind').onchange = applyFilter;
+$('fBlock').onchange = applyFilter;
+let fTimer = 0;
+$('fName').addEventListener('input', () => { clearTimeout(fTimer); fTimer = setTimeout(applyFilter, 250); });
+$('fClear').onclick = () => { $('fKind').value = ''; $('fBlock').value = ''; $('fName').value = ''; applyFilter(); };
 
 // IFC class name in schema casing (e.g. IfcSolarDevice), taken from web-ifc's entity classes
 const typeNameCache = new Map();
@@ -2019,7 +2552,7 @@ function groupRow(nodeId, cls, ids, depth) {
 }
 function buildTreeUI() {
   groupCache.clear();
-  const p = $('p-tree'); p.innerHTML = '';
+  const p = $('treeRoot'); p.innerHTML = '';
   if (spatial.root == null) { p.innerHTML = '<p class="muted" style="padding:8px">No spatial structure</p>'; return; }
   const root = nodeRow(spatial.root, 0); p.appendChild(root); bindEye(p);
   // open first two levels
@@ -2037,10 +2570,19 @@ function buildClassesUI() {
   classIndex.clear();
   for (const eid of elements.keys()) { const c = prettyType(elementType(eid)); if (!classIndex.has(c)) classIndex.set(c, []); classIndex.get(c).push(eid); }
   const p = $('p-classes');
-  p.innerHTML = [...classIndex.entries()].sort((a, b) => b[1].length - a[1].length).map(([c, ids]) =>
-    `<div class="row" data-c="${c}">${eyeHtml('c:' + c)}<span class="nm">${c}</span><span class="ct">${ids.length}</span></div>`).join('');
-  p.querySelectorAll('.row').forEach(r => { r.onclick = () => select(classIndex.get(r.dataset.c)); r.ondblclick = () => fitTo(classIndex.get(r.dataset.c)); });
+  p.innerHTML = `<label class="row selall" title="Show or hide every class"><input type="checkbox" id="clsAll" class="eye"><span class="nm">Select all</span><span class="ct">${classIndex.size} classes</span></label>` +
+    [...classIndex.entries()].sort((a, b) => b[1].length - a[1].length).map(([c, ids]) =>
+    `<div class="row" data-c="${c}" title="Click to highlight ${c} (everything else fades) · double-click to zoom"><input type="checkbox" class="eye" data-k="c:${c}" title="Show / hide"><span class="nm">${c}</span><span class="ct">${ids.length.toLocaleString('en-IN')}</span></div>`).join('');
+  p.querySelectorAll('.row[data-c]').forEach(r => { r.onclick = () => select(classIndex.get(r.dataset.c)); r.ondblclick = () => fitTo(classIndex.get(r.dataset.c)); });
   bindEye(p);
+  $('clsAll').onclick = (ev) => {
+    ev.stopPropagation();
+    const show = ev.target.checked;
+    for (const eid of elements.keys()) setHidden(eid, !show);
+    if (!show) select([]);
+    refreshVisibilityUI();
+  };
+  updateClsAll();
 }
 
 // ---------------------------------------------------------------- views menu
@@ -2085,14 +2627,14 @@ document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
 });
 $('bFit').onclick = () => fitAll();
 $('bTop').onclick = () => fitBox(selected.size ? boxOf([...selected]) : boxOf([...elements.keys()].filter(id => !/GeographicElement/i.test(elementType(id)))), true);
-$('colorMode').onchange = (e) => applyColorMode(e.target.value);
+$('colorMode').onchange = (e) => { const v = e.target.value; if (tl.mode) { tl.prevMode = v; tlClose(); } else applyColorMode(v); };
 function isolate() {
   if (!selected.size) return;
   for (const eid of elements.keys()) setHidden(eid, !selected.has(eid));
   refreshVisibilityUI(); fitTo([...selected]);
 }
 function hideSel() { for (const eid of selected) setHidden(eid, true); select([]); refreshVisibilityUI(); }
-function showAll() { for (const eid of elements.keys()) setHidden(eid, false); refreshVisibilityUI(); }
+function showAll() { for (const eid of elements.keys()) setHidden(eid, false); if (tl.mode) tlRefresh(true); refreshVisibilityUI(); }
 $('bIso').onclick = isolate; $('bHide').onclick = hideSel; $('bShow').onclick = showAll;
 function toggleMeasure(on = !measuring) { measuring = on; $('bMeasure').classList.toggle('on', on); renderer.domElement.style.cursor = on ? 'crosshair' : ''; if (!on) clearMeasure(); }
 $('bMeasure').onclick = () => toggleMeasure();
@@ -2104,6 +2646,7 @@ $('bTour').onclick = () => tour ? stopTour() : startTour();
 $('bReal').onclick = () => setRealistic(!realistic);
 $('bShadow').onclick = () => { shadowsOn = !shadowsOn; $('bShadow').classList.toggle('on', shadowsOn); applyEnvironment(); };
 $('bLabels').onclick = () => { labelsOn = !labelsOn; $('bLabels').classList.toggle('on', labelsOn); needsRender = true; };
+$('bFocus').onclick = () => setFocus(!focusOn);
 $('bAnim').onclick = () => { animateOn = !animateOn; $('bAnim').classList.toggle('on', animateOn); };
 renderer.domElement.addEventListener('pointerdown', () => { if (tour) stopTour(); });
 renderer.domElement.addEventListener('wheel', () => { if (tour) stopTour(); }, { passive: true });
@@ -2117,12 +2660,13 @@ async function openFile(f) {
 view.addEventListener('dragover', e => { e.preventDefault(); });
 view.addEventListener('drop', async e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) await openFile(f); });
 window.addEventListener('keydown', e => {
-  if (e.target.tagName === 'INPUT') return;
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') { if (e.key === 'Escape' && !$('taskDlg').hidden) closeTaskDialog(); return; }
   const k = e.key.toLowerCase();
   if (k === 'f') fitAll(); else if (k === 't') $('bTop').click(); else if (k === 'i') isolate();
   else if (k === 'h') hideSel(); else if (k === 'a') showAll(); else if (k === 'm') toggleMeasure();
   else if (k === 'r') $('bReal').click(); else if (k === 's') $('bShadow').click(); else if (k === 'l') $('bLabels').click();
-  else if (k === 'escape') { select([]); toggleMeasure(false); }
+  else if (k === 'g') setFocus(!focusOn);
+  else if (k === 'escape') { if (!$('taskDlg').hidden) { closeTaskDialog(); return; } select([]); toggleMeasure(false); }
 });
 function updateStats() {
   let vis = 0; for (const e of elements.values()) if (!e.hidden) vis++;
@@ -2130,7 +2674,7 @@ function updateStats() {
   $('stStats').textContent = `${elements.size.toLocaleString()} elements (${vis.toLocaleString()} visible) · ${(tris / 1e6).toFixed(2)} M triangles · ${meshes.length} draw batches`;
 }
 
-window.viewer = { ifc, get modelID() { return modelID; }, elements, select, fitTo, camera, controls, tagList, renderer,
+window.viewer = { ifc, get modelID() { return modelID; }, elements, select, fitTo, camera, controls, tagList, renderer, hlRoot, meshes, tl, sched,
   redraw: () => { needsRender = true; shadowDirty = true; },
   fitAll: () => fitAll(),
   frameMs: () => { const t = performance.now(); updateSun(); updateLOD(); renderer.shadowMap.needsUpdate = true; renderer.render(scene, camera); renderer.getContext().finish(); return performance.now() - t; } };

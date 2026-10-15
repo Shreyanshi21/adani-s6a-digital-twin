@@ -213,13 +213,23 @@ if mc: E0, N0 = mc[0].Eastings, mc[0].Northings; crs = mc[0].TargetCRS.Name
 tasks = []
 ws = f.by_type('IfcWorkSchedule')
 task_idx = {}
+def vl_pset(t):
+    for r in t.IsDefinedBy or []:
+        if r.is_a('IfcRelDefinesByProperties') and r.RelatingPropertyDefinition.Name == 'VL_Activity':
+            return {p.Name: p.NominalValue.wrappedValue for p in r.RelatingPropertyDefinition.HasProperties if p.NominalValue}
+    return {}
+
+
 for t in f.by_type('IfcTask'):
     if (t.ObjectType or '') != 'VisiLean Activity': continue
     tt = t.TaskTime
+    vp = vl_pset(t)
     task_idx[t.id()] = len(tasks)
     tasks.append({'id': t.id(), 'code': t.Identification or '', 'name': t.Name or '', 'loc': t.Description or '', 'status': t.Status or '',
                   'ps': tt.ScheduleStart if tt else None, 'pf': tt.ScheduleFinish if tt else None,
                   'as': tt.ActualStart if tt else None, 'af': tt.ActualFinish if tt else None,
+                  'es': tt.EarlyStart if tt else None, 'ef': tt.EarlyFinish if tt else None,
+                  'bs': vp.get('BaselineStart'), 'bf': vp.get('BaselineFinish'),
                   'pct': round((tt.Completion or 0) * 100) if tt else 0, 'dd': tt.StatusTime if tt else None,
                   'mile': bool(t.IsMilestone), 'elems': []})
 for r in f.by_type('IfcRelAssignsToProcess'):

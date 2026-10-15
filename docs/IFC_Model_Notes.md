@@ -22,16 +22,18 @@
   - Module installation, module RFI, DC cable, MC4, VOC → modules
   - Piling-inverters → inverter structures
   - Inverter installation and terminations → inverters
-  - IDT foundations, HT/LT station slab, NIFPS/BOT foundations → IDT plinth
-  - IDT erection, filtration, testing, HT terminations → IDT
+  - IDT foundations, HT/LT station slab, NIFPS/BOT/aux transformer foundations → IDT plinth
+  - IDT erection, filtration, testing, NIFPS installation, HT terminations → IDT
   - Station shed, sheeting, staircase, HT panel → HT panel
   - LT panel, ACDB, SCADA → LT panel
-  - Aux transformer → aux transformer
+  - Aux transformer installation → aux transformer
   - IDT fencing, gate, gravel → IDT fence
   - Cabling, pre-commissioning, commissioning, HOTO → block array zone
 - **How VisiLean status is derived from P6:** Complete = P6 complete. Started = P6 in progress. A not-started activity is Not Committed when all its logic predecessors are satisfied, otherwise Not Ready. Delayed = past its planned start or finish at the data date.
 - **Status at data date:** 533 Complete, 102 Started, 87 Not Committed, 1,578 Not Ready; 45 delayed.
 - **Colours (sampled from VisiLean screens):** Not Ready `#d47d70`, Not Committed `#ddd75d`, Started `#3c007b`, Complete `#72a64c`. Ready, Forced Ready and Committed only appear when a VisiLean export is loaded; their colours are placeholders to confirm.
+- **Baseline (Planned vs Actual):** P6 resets the planned dates of not-started activities on every update, so the baseline is taken from an earlier XER: the oldest other file in `data/schedule/` (now `FY26-P18 S6a 07.09.2026.xer`). Each activity carries `BaselineStart` / `BaselineFinish` in its `VL_Activity` pset.
+- **Link check (01.10.2026 XER):** all 1,387 block activities link to elements of their own block and to every element of the mapped type; P6 progress is consistent (no complete activity without an actual finish, no started one without an actual start). One P6 naming slip: `S06A-CC-4850` is named *Block-05 - Tracker Commissioning - SCADA* but sits under BLOCK-06 in the WBS; it is linked by its WBS (BLOCK-06), as VisiLean files it.
 - **Using live VisiLean statuses:** in the viewer, open the Schedule tab and click **Load VisiLean export (CSV)**. It matches on the `External Id` and `Status` columns and skips WBS (Parent) rows.
 - **Re-linking a newer XER:** drop it into `data/schedule/` and run `python pipeline/run_pipeline.py --from link`. The underlying script is `pipeline/link_schedule.py model.ifc schedule.xer out.ifc report.json`.
 
@@ -75,7 +77,7 @@ Project
 └─ Site: Khavda Hybrid Renewable Energy Park
    ├─ Site: Plot S6a – 234 MW AC / 318.26 MWp
    │  ├─ Block-01 (ICR-01) … Block-19 (ICR-19)   ← tables, inverters, ICR station, coloured zone
-   │  ├─ S6a Common Infrastructure               ← internal / peripheral roads, fence, WTG roads, crane pads
+   │  ├─ S6a Common Infrastructure               ← internal, approach and peripheral roads, fence, WTG roads, crane pads
    │  ├─ PSS-10 / KPS-3 33/400 kV GIS             ← 4 power transformers, GIS hall, control bldg, SVG/HF bays
    │  └─ BESS – PSS-10                            ← battery containers and PCS skids (Ph-1 yards + 39 acre area)
    ├─ Wind Farm – 393 × 5.2 MW WTG (W2E, HH 120 m, RD 160 m)
@@ -106,4 +108,5 @@ Phase mapping: Blocks 1–4 = Phase-1, 5–8 = Phase-2, 9–12 = Phase-3, 13–1
 - **Typical dimensions:** these items are modelled from typical sizes, not drawn details: table clearance (0.8 m lower edge), pile and rafter sections, inverter canopy, IDT and panel sizes, power transformers, GIS hall, BESS container layout, tower shape and WTG shape.
 - **Other plots:** only plot boundaries exist on sheet 1, so all plots other than S6a are shown as indicative HSAT rows.
 - **Other PSS:** PSS-01 to PSS-13 (except PSS-10) use a generic substation layout placed at their GIS symbol on sheet 1. PSS-02 and PSS-05 had no GIS symbol, so they are placed at their labels.
+- **Roads:** the drawing's `Road` layer is split by direction: the E-W runs along the ICR rows are *S6a Internal Roads*, the N-S branches that link them to the peripheral plant road are *S6a Approach Roads* (about 4.9 km + 1.1 km, matching the 6,000 m internal road on the BOQ).
 - **Not modelled:** the cable trench sections (sheet 9) and the DC/AC cable routes.

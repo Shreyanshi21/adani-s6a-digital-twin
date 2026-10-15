@@ -24,6 +24,7 @@ You need Python 3.11 or newer. The viewer needs a recent Chrome or Edge, and int
 |---|---|
 | Build everything (reuses finished steps) | `python pipeline/run_pipeline.py` |
 | New schedule: drop the `.xer` into `data/schedule/`, then | `python pipeline/run_pipeline.py --from link` |
+| Choose the baseline for Planned vs Actual | `--baseline <file>` (default: the oldest other `.xer` in `data/schedule/`) |
 | Rebuild the IFC after editing `build_ifc.py` | `python pipeline/run_pipeline.py --from ifc` |
 | Rebuild viewer outputs after editing `viewer/index.html` | `python pipeline/run_pipeline.py --from dist` |
 | Open the viewer | `python -m http.server 8765 --directory dist`, then go to <http://localhost:8765> |
@@ -53,10 +54,13 @@ The viewer is a single HTML file using three.js r160 and web-ifc 0.0.66. It load
 Features:
 - Realistic mode: sky, sun shadows, textured PV modules, spinning WTGs, guided tour.
 - Labels by zoom level.
-- Model tree, classes and search panels.
+- Model tree (with an element filter by type, block and name), classes (visibility checkboxes and Select all) and search panels.
+- Focus (`G`): whatever is selected, from the 3D view, the tree, a class, a filter or an activity, is drawn solid and everything else fades.
 - Properties panel with UTM E/N coordinates.
 - Colour modes: VisiLean status, block, IFC class.
-- Schedule tab: status roll-up, work-type filter, as-built view, delayed highlight, and import of a VisiLean CSV export (`External Id` + `Status`).
+- Schedule tab: status buttons that open the activity list (click an activity for its properties and linked elements), a filter of linked elements by VisiLean status, location and element type, work-type colouring, as-built view, delayed highlight, and import of a VisiLean CSV export (`External Id` + `Status`).
+- Timeline: **4D Simulation** plays the build sequence (actual dates up to the data date, forecast after it) and **Planned vs Actual** colours each element behind / on track / ahead of the baseline, with a cumulative plan-vs-actual curve.
+- Road labels for internal, approach, peripheral plant and WTG access roads.
 - Wheel zoom about the point under the cursor, double-click to fly to a spot, and a measure tool.
 
 **Status colours** (sampled from VisiLean): Not Ready `#d47d70` · Not Committed `#ddd75d` · Started `#3c007b` · Complete `#72a64c`.

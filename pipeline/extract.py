@@ -222,13 +222,28 @@ def lines_union(layer_list, rad, L, minlen=0.0):
                     ls.append(LineString([a, b]).buffer(rad, cap_style=2, join_style=2))
     return unary_union(ls) if ls else None
 
-road_int = lines_union(['Road'], 1.2, L3).buffer(1.5).buffer(-1.5)        # close dashed double lines into a band
+def road_split(layer, rad, L, min_branch=25.0):
+    """'Road' layer -> (internal, approach). Internal roads run E-W along the ICR rows; approach roads are the
+    N-S branches that connect them to the peripheral plant road. Short N-S pieces (line ends) stay internal."""
+    along, branch = [], []
+    for x in L[layer]:
+        for a, b in segs(x['items']):
+            (ax, ay), (bx, by) = T3(a), T3(b)
+            dx, dy = abs(bx - ax), abs(by - ay)
+            seg = LineString([a, b]).buffer(rad, cap_style=2, join_style=2)
+            (branch if dy > dx and math.hypot(dx, dy) >= min_branch else along).append(seg)
+    close = lambda ls: unary_union(ls).buffer(1.5).buffer(-1.5) if ls else None
+    return close(along), close(branch)
+
+
+road_int, road_app = road_split('Road', 1.2, L3)                           # close dashed double lines into a band
 road_plant = lines_union(['Plant Road'], 1.1, L3).buffer(1.5).buffer(-1.5)
 road_wtg = lines_union(['5.2MW WTG Road'], 1.0, L3).buffer(1.5).buffer(-1.5)
 F['s6a']['roads_internal'] = poly_out(road_int, T3, simp=0.3, minarea=20)
+F['s6a']['roads_approach'] = poly_out(road_app, T3, simp=0.3, minarea=20) if road_app is not None else []
 F['s6a']['roads_plant'] = poly_out(road_plant, T3, simp=0.3, minarea=20)
 F['s6a']['roads_wtg'] = poly_out(road_wtg, T3, simp=0.3, minarea=20)
-print('roads', len(F['s6a']['roads_internal']), len(F['s6a']['roads_plant']), len(F['s6a']['roads_wtg']))
+print('roads', len(F['s6a']['roads_internal']), len(F['s6a']['roads_approach']), len(F['s6a']['roads_plant']), len(F['s6a']['roads_wtg']))
 
 # crane hardstands (filled rects)
 cranes = [x for x in L3['5.2MW WTG Crane'] if x['type'] == 'fs' and x['rect'].width > 50]

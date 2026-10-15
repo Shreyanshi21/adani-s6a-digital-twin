@@ -20,14 +20,22 @@ STEPS = ['pdf', 'extract', 'ifc', 'link', 'scene', 'dist', 'web']
 MODEL = 'Khavda_Hybrid_Park_S6a-234MW'
 
 
+def xer_key(p):
+    m = re.search(r'(\d{2})\.(\d{2})\.(\d{4})', os.path.basename(p))
+    return (m.group(3), m.group(2), m.group(1)) if m else ('0000', '00', '00') + (str(os.path.getmtime(p)),)
+
+
 def latest_xer():
     """Newest schedule: by the dd.mm.yyyy date in the file name (e.g. 'FY26-P18 S6a 01.10.2026.xer'), else file time."""
     files = glob.glob(os.path.join(ROOT, 'data', 'schedule', '*.xer'))
     if not files: sys.exit('No .xer found in data/schedule')
-    def key(p):
-        m = re.search(r'(\d{2})\.(\d{2})\.(\d{4})', os.path.basename(p))
-        return (m.group(3), m.group(2), m.group(1)) if m else ('0000', '00', '00') + (str(os.path.getmtime(p)),)
-    return max(files, key=key)
+    return max(files, key=xer_key)
+
+
+def baseline_xer(current):
+    """Oldest other schedule in data/schedule: its planned dates are the baseline for Planned vs Actual."""
+    files = [p for p in glob.glob(os.path.join(ROOT, 'data', 'schedule', '*.xer')) if os.path.abspath(p) != os.path.abspath(current)]
+    return min(files, key=xer_key) if files else None
 
 
 def run(script, *args):
@@ -42,18 +50,20 @@ def main():
     ap.add_argument('--from', dest='start', choices=STEPS, default=None, help='force re-run from this step')
     ap.add_argument('--pdf', default=glob.glob(os.path.join(ROOT, 'data', 'drawings', '*.pdf'))[0] if glob.glob(os.path.join(ROOT, 'data', 'drawings', '*.pdf')) else None)
     ap.add_argument('--xer', default=None, help='P6 schedule (default: newest file in data/schedule)')
+    ap.add_argument('--baseline', default=None, help='P6 schedule whose planned dates are the baseline (default: oldest other file in data/schedule)')
     a = ap.parse_args()
     xer = a.xer or latest_xer()
+    base = a.baseline or baseline_xer(xer)
     os.makedirs(BUILD, exist_ok=True)
     force = set(STEPS[STEPS.index(a.start):]) if a.start else set()
     out = lambda *p: os.path.join(BUILD, *p)
     need = lambda step, path: step in force or not os.path.exists(path)
 
-    print(f'PDF : {a.pdf}\nXER : {xer}')
+    print(f'PDF : {a.pdf}\nXER : {xer}\nBaseline : {base or "none (planned dates of the current XER)"}')
     if need('pdf', out('p3.pkl')): run('cache_pdf.py', a.pdf, BUILD)
     if need('extract', out('features.json')): run('extract.py', BUILD)
     if need('ifc', out(f'{MODEL}_base.ifc')): run('build_ifc.py', out('features.json'), out(f'{MODEL}_base.ifc'))
-    if need('link', out(f'{MODEL}.ifc')): run('link_schedule.py', out(f'{MODEL}_base.ifc'), xer, out(f'{MODEL}.ifc'), out('link_report.json'))
+    if need('link', out(f'{MODEL}.ifc')): run('link_schedule.py', out(f'{MODEL}_base.ifc'), xer, out(f'{MODEL}.ifc'), out('link_report.json'), *([base] if base else []))
     if need('scene', out('scene.bin')): run('export_scene.py', out(f'{MODEL}.ifc'), out('scene.bin'))
 
     if 'dist' in force or not os.path.exists(os.path.join(DIST, 'index.html')) or a.start is None:
