@@ -138,9 +138,12 @@
   .tl-cmp td:first-child { text-align: left; display: flex; align-items: center; gap: 6px; }
   /* split screen (compare with actual) */
   #cmpDiv { position: absolute; top: 0; bottom: 0; width: 8px; margin-left: -4px; z-index: 3; cursor: col-resize; background: transparent; }
-  #cmpDiv::before { content: ''; position: absolute; left: 3px; top: 0; bottom: 0; width: 2px; background: var(--top); }
+  #cmpDiv { width: 16px; margin-left: -8px; }
+  #cmpDiv::before { content: ''; position: absolute; left: 7px; top: 0; bottom: 0; width: 2px; background: #5b6b80; }
   #cmpDiv[hidden], .cmp-lab[hidden] { display: none; }
-  .cmp-grip { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: var(--top); color: #fff; border-radius: 5px; padding: 10px 3px; font-size: 14px; line-height: 1; }
+  .cmp-grip { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 32px; height: 32px; border-radius: 50%; background: #fff; color: #14213d;
+    box-shadow: 0 1px 6px rgba(0,0,0,.3); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; letter-spacing: -1px; }
+  #cmpR { background: #0b6bcb; }
   .cmp-lab { position: absolute; top: 10px; z-index: 3; background: rgba(20,33,61,.88); color: #fff; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 12.5px; pointer-events: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .sch-btn { width: 100%; margin-top: 6px; padding: 6px; border: 1px solid var(--line); background: #f6f8fa; border-radius: 6px; cursor: pointer; font: inherit; }
   .sch-btn:hover { background: #eef1f4; }
@@ -260,7 +263,7 @@
       <div class="dlg-body"><table class="dlg-t"><thead><tr><th>Status</th><th>Activity ID</th><th>Activity</th><th>Location</th><th>Baseline start → finish</th><th>Planned start → finish</th><th>Actual start → finish</th><th>%</th><th>Elements</th></tr></thead><tbody id="dlgRows"></tbody></table></div>
       <div class="dlg-foot" id="dlgFoot"></div>
     </div></div>
-    <div id="cmpDiv" hidden title="Drag to resize the two views"><div class="cmp-grip">⋮</div></div>
+    <div id="cmpDiv" hidden title="Drag to slide between the two"><div class="cmp-grip">‹ ›</div></div>
     <div id="cmpL" class="cmp-lab" hidden></div><div id="cmpR" class="cmp-lab" hidden></div>
     <div id="timeline" hidden>
       <div class="tl-row">
@@ -1171,6 +1174,7 @@ function setRealistic(on) {
   applyEnvironment();
   for (const eid of elements.keys()) repaintElement(eid);
   if (focusActive) refreshFocus();
+  if (cmp.on) cmpMaterials();
   $('bReal').classList.toggle('on', on); $('bShadow').disabled = !on;
   needsRender = true;
 }
@@ -2052,7 +2056,7 @@ function tlLegend() {
   } else {
     const L = cnt(tl.cmpBasis), R = cnt('actual'), v = [0, 0, 0];      // behind, on track, ahead
     for (const t of tasks) { const p = taskState(t, D, tl.cmpBasis), a = taskState(t, D, 'actual'); if (p === 0 && a === 0) continue; v[a < p ? 0 : a > p ? 2 : 1]++; }
-    const row = (i) => `<tr><td><span class="sw" style="background:${SIM[i].hex}"></span>${SIM[i].label.replace(' (hidden)', '')}</td><td>${L[i].toLocaleString('en-IN')}</td><td>${R[i].toLocaleString('en-IN')}</td></tr>`;
+    const row = (i) => `<tr><td>${SIM[i].label}</td><td>${L[i].toLocaleString('en-IN')}</td><td>${R[i].toLocaleString('en-IN')}</td></tr>`;
     html = `<table class="tl-cmp"><tr><th>Activities</th><th>${BASIS[tl.cmpBasis]}</th><th>Actual</th></tr>${[2, 1, 0].map(row).join('')}</table>` +
       `<div class="muted" style="margin-top:3px"><b style="color:#d13636">${v[0].toLocaleString('en-IN')} behind</b> · ${v[1].toLocaleString('en-IN')} on track · <b style="color:#2f7fd1">${v[2].toLocaleString('en-IN')} ahead</b> of ${BASIS[tl.cmpBasis].toLowerCase()}</div>` +
       `<div class="muted">Progress: ${BASIS[tl.cmpBasis].toLowerCase()} ${progShare(tasks, D, tl.cmpBasis)}% · actual ${progActual(tasks)}% at the data date</div>`;
@@ -2115,17 +2119,30 @@ function tlPlay() {
 
 // ---- split screen: every model mesh gets a twin carrying two per-element states (aL left, aR right);
 // the shader colours or hides by state, and each half of the canvas is drawn with its own side.
-// States: -2 keep own colour (ground, roads), -1 context grey (no activity), 0 hidden, 1 in progress, 2 complete.
+// States: -2 ground / roads, -1 no activity, 0 hidden (not started on that side), 1 in progress, 2 complete.
+// Both sides use the model's own materials and colours (as in the normal view); only state 0 is hidden.
 const CMP_U = { uSide: { value: 0 }, uC1: { value: new THREE.Color(0x3c007b) }, uC2: { value: new THREE.Color(0x72a64c) }, uCtx: { value: new THREE.Color(0xd5d9de) } };
-const CMP_MAT = new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide });
-CMP_MAT.onBeforeCompile = (sh) => {
-  Object.assign(sh.uniforms, CMP_U);
-  sh.vertexShader = sh.vertexShader
-    .replace('#include <common>', '#include <common>\nattribute float aL;\nattribute float aR;\nuniform float uSide;\nuniform vec3 uC1;\nuniform vec3 uC2;\nuniform vec3 uCtx;')
-    .replace('#include <color_vertex>', '#include <color_vertex>\n  float cs = uSide < 0.5 ? aL : aR;\n#ifdef USE_COLOR\n  if (cs > 1.5) vColor.rgb = uC2; else if (cs > 0.5) vColor.rgb = uC1; else if (cs > -1.5) vColor.rgb = uCtx;\n#endif')
-    .replace('#include <project_vertex>', '#include <project_vertex>\n  if (abs(cs) < 0.5) gl_Position = vec4(2.0, 2.0, 2.0, 1.0);');
-};
-CMP_MAT.customProgramCacheKey = () => 'cmp-split';
+const CMP_MATS = new Map();          // normal material -> clone that also hides state-0 elements on its side
+function cmpMat(base) {
+  let m = CMP_MATS.get(base);
+  if (m) return m;
+  m = base.clone();
+  m.onBeforeCompile = (sh) => {
+    sh.uniforms.uSide = CMP_U.uSide;
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nattribute float aL;\nattribute float aR;\nuniform float uSide;')
+      .replace('#include <project_vertex>', 'float cs = uSide < 0.5 ? aL : aR;\n#include <project_vertex>\n  if (abs(cs) < 0.5) gl_Position = vec4(2.0, 2.0, 2.0, 1.0);');
+  };
+  m.customProgramCacheKey = () => 'cmp-hide';
+  CMP_MATS.set(base, m);
+  return m;
+}
+// twins take the materials of the normal (IFC colours) view, whatever colour mode is active
+function cmpMaterials() {
+  const save = colorMode; colorMode = 'ifc';
+  for (const [m, c] of cmp.pairs) c.material = cmpMat(getMat(m.userData.cat, m.userData.kind === 'merged', m.userData.trans));
+  colorMode = save;
+}
 const cmp = { on: false, split: 0.5, root: new THREE.Group(), pairs: [], copy: new Map(), code: new Map(), keep: new Map(), drag: false };
 cmp.root.visible = false; scene.add(cmp.root);
 function cmpBuild() {
@@ -2134,12 +2151,12 @@ function cmpBuild() {
     const g0 = m.geometry, g = new THREE.BufferGeometry();
     let c;
     if (m.userData.kind === 'inst') {
-      for (const k of ['position', 'normal', 'color']) if (g0.attributes[k]) g.setAttribute(k, g0.attributes[k]);
+      for (const k of ['position', 'normal', 'color', 'uv']) if (g0.attributes[k]) g.setAttribute(k, g0.attributes[k]);
       g.setIndex(g0.index);
       const n = m.count;
       g.setAttribute('aL', new THREE.InstancedBufferAttribute(new Float32Array(n).fill(-2), 1));
       g.setAttribute('aR', new THREE.InstancedBufferAttribute(new Float32Array(n).fill(-2), 1));
-      c = new THREE.InstancedMesh(g, CMP_MAT, n);
+      c = new THREE.InstancedMesh(g, undefined, n);
       for (let i = 0; i < n; i++) c.setMatrixAt(i, _im4.fromArray(m.userData.base[i]));
       c.instanceMatrix.needsUpdate = true; c.computeBoundingSphere();
     } else {
@@ -2147,10 +2164,11 @@ function cmpBuild() {
       g.setAttribute('position', new THREE.BufferAttribute(m.userData.pos0, 3));
       g.setAttribute('normal', g0.attributes.normal);
       g.setAttribute('color', new THREE.BufferAttribute(m.userData.col0, 3));
+      if (g0.attributes.uv) g.setAttribute('uv', g0.attributes.uv);
       g.setAttribute('aL', new THREE.BufferAttribute(new Float32Array(nv).fill(-2), 1));
       g.setAttribute('aR', new THREE.BufferAttribute(new Float32Array(nv).fill(-2), 1));
       g.setIndex(g0.index); g.computeBoundingSphere();
-      c = new THREE.Mesh(g, CMP_MAT);
+      c = new THREE.Mesh(g);
     }
     cmp.root.add(c); cmp.pairs.push([m, c]); cmp.copy.set(m, c);
   }
@@ -2158,6 +2176,7 @@ function cmpBuild() {
 function cmpDispose() {
   for (const [, c] of cmp.pairs) { c.geometry.dispose(); if (c.isInstancedMesh) c.dispose(); }
   cmp.root.clear(); cmp.pairs.length = 0; cmp.copy.clear(); cmp.code.clear(); cmp.keep.clear();
+  for (const m of CMP_MATS.values()) m.dispose(); CMP_MATS.clear();
 }
 const keepOwn = (eid) => {
   if (!cmp.keep.has(eid)) cmp.keep.set(eid, /GeographicElement/i.test(elementType(eid)) || elements.get(eid).parts.some(p => p.cat === 'ground' || p.cat === 'road'));
@@ -2194,8 +2213,8 @@ function cmpHiddenHere(eid) {
 function cmpPlace() {
   const W = view.clientWidth, x = Math.round(W * cmp.split);
   $('cmpDiv').style.left = x + 'px';
-  $('cmpL').style.left = '12px'; $('cmpL').style.maxWidth = Math.max(60, x - 24) + 'px';
-  $('cmpR').style.left = (x + 12) + 'px'; $('cmpR').style.maxWidth = Math.max(60, W - x - 24) + 'px';
+  $('cmpL').style.left = '12px'; $('cmpR').style.right = '12px';
+  $('cmpL').style.opacity = x > 120 ? 1 : 0; $('cmpR').style.opacity = W - x > 120 ? 1 : 0;
 }
 function cmpLabels() {
   const d = new Date(tl.t), ds = `${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}`;
@@ -2203,9 +2222,8 @@ function cmpLabels() {
   $('cmpR').textContent = `Actual · ${ds}` + (tl.t > tl.dd + DAY ? ' (as at data date)' : '');
 }
 function cmpOn() {
-  cmpBuild(); cmp.on = true;
+  cmpBuild(); cmpMaterials(); cmp.on = true;
   for (const id of ['cmpDiv', 'cmpL', 'cmpR']) $(id).hidden = false;
-  $('tags').style.display = 'none';
   sun.castShadow = false;
   cmpPlace(); needsRender = true;
 }
@@ -2213,7 +2231,6 @@ function cmpOff() {
   if (!cmp.on) return;
   cmp.on = false;
   for (const id of ['cmpDiv', 'cmpL', 'cmpR']) $(id).hidden = true;
-  $('tags').style.display = '';
   applyEnvironment();
 }
 function cmpRender() {
@@ -2222,40 +2239,24 @@ function cmpRender() {
   modelRoot.visible = false; hlRoot.visible = false; cmp.root.visible = true;
   renderer.setScissorTest(true);
   const side = (u, x0, w) => {
-    if (w < 2) return;
+    if (w < 1) return;
     CMP_U.uSide.value = u;
-    renderer.setViewport(x0, 0, w, H); renderer.setScissor(x0, 0, w, H);
-    paneCamera(w / Math.max(1, H));
+    renderer.setScissor(x0, 0, w, H);
     renderer.render(scene, camera);
   };
-  const fov0 = camera.fov;
   side(0, 0, x); side(1, x, W - x);
-  renderer.setScissorTest(false); renderer.setViewport(0, 0, W, H);
-  camera.fov = fov0; camera.aspect = W / Math.max(1, H); camera.updateProjectionMatrix();
+  renderer.setScissorTest(false);
   modelRoot.visible = true; hlRoot.visible = true; cmp.root.visible = false;
 }
 // mouse position -> normalised device coordinates of the pane under it (split screen: each pane has its own aspect)
 function paneNDC(ev, out) {
   const r = renderer.domElement.getBoundingClientRect(), px = ev.clientX - r.left;
-  let x = px / r.width, w = r.width;
-  if (cmp.on) { const sx = r.width * cmp.split; cmp.side = px < sx ? 0 : 1; if (px < sx) { x = px / sx; w = sx; } else { x = (px - sx) / (r.width - sx); w = r.width - sx; } }
-  out.set(x * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
-  return w / r.height;
+  if (cmp.on) cmp.side = px < r.width * cmp.split ? 0 : 1;
+  out.set((px / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
+  return r.width / r.height;
 }
-// each pane shows the same picture as the full view, scaled to its width: keep the horizontal field of view and
-// widen the vertical one for a narrower pane (otherwise a pane only shows the middle strip of the scene)
-const FOV_FULL = camera.fov;
-function paneCamera(aspect) {
-  const full = view.clientWidth / Math.max(1, view.clientHeight);
-  const h = Math.atan(Math.tan(THREE.MathUtils.degToRad(FOV_FULL) / 2) * full);
-  camera.fov = Math.min(150, THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(h) / aspect)));
-  camera.aspect = aspect; camera.updateProjectionMatrix();
-}
-function withPaneCamera(aspect, fn) {
-  if (!cmp.on) return fn();
-  const a0 = camera.aspect, f0 = camera.fov; paneCamera(aspect);
-  try { return fn(); } finally { camera.fov = f0; camera.aspect = a0; camera.updateProjectionMatrix(); }
-}
+// one picture for both sides: the camera never changes, only which side of the divider the mouse is on
+function withPaneCamera(aspect, fn) { return fn(); }
 $('cmpDiv').onpointerdown = (ev) => { ev.preventDefault(); ev.stopPropagation(); $('cmpDiv').setPointerCapture(ev.pointerId); cmp.drag = true; };
 $('cmpDiv').onpointermove = (ev) => {
   if (!cmp.drag) return;
